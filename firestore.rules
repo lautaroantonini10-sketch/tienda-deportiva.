@@ -1,0 +1,15 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Lectura pública del catálogo de productos
+    match /productos/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+    
+    // Regla para la colección "compras" que usa tu script.js
+    match /compras/{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
