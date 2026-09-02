@@ -108,7 +108,8 @@ function actualizarCarritoUI() {
 
     // Eventos para eliminar ítems individuales
     document.querySelectorAll(".btn-eliminar").forEach((btn) => {
-        btn.addEventListener("click", function () {
+        btn.addEventListener("click", function (e) {
+            e.stopPropagation();
             const idx = Number(this.getAttribute("data-index"));
             eliminarDelCarrito(idx);
         });
