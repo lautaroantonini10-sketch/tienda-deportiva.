@@ -1,15 +1,30 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Lectura pública del catálogo de productos
-    match /productos/{document=**} {
+
+    // Catálogo: cualquiera puede leerlo,
+    // pero nadie puede modificarlo desde el frontend.
+    match /productos/{productoId} {
       allow read: if true;
       allow write: if false;
     }
-    
-    // Regla para la colección "compras" que usa tu script.js
-    match /compras/{document=**} {
-      allow read, write: if true;
+
+    // Compras
+    match /compras/{compraId} {
+
+      // Un usuario autenticado puede crear una compra
+      // solamente a su propio nombre.
+      allow create: if request.auth != null
+                    && request.resource.data.usuarioUid == request.auth.uid;
+
+      // Un usuario solamente puede leer sus propias compras.
+      allow read: if request.auth != null
+                  && resource.data.usuarioUid == request.auth.uid;
+
+      // Por ahora el navegador no puede modificar
+      // ni eliminar compras ya creadas.
+      allow update, delete: if false;
     }
   }
 }
