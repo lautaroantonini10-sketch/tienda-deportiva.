@@ -182,44 +182,22 @@ document.querySelectorAll(".producto button").forEach((boton) => {
 });
 
 // ==========================================
-// 4. BÚSQUEDA Y FILTROS
+// 4. BÚSQUEDA
 // ==========================================
 const inputBuscador = document.querySelector("#input-buscador");
-const panelFiltros = document.querySelector("#panel-filtros");
-const btnLimpiarFiltros = document.querySelector("#btn-limpiar-filtros");
-const checkboxesFiltro = document.querySelectorAll(".filtro-check");
 const productos = document.querySelectorAll(".producto");
+const catalogo = document.querySelector("#catalogo");
 
-function aplicarFiltrosYBusqueda() {
-    const textoBusqueda = inputBuscador ? inputBuscador.value.toLowerCase().trim() : "";
+function aplicarBusqueda() {
+    const textoBusqueda = inputBuscador
+        ? inputBuscador.value.toLowerCase().trim()
+        : "";
 
-    // Agrupar los filtros seleccionados por categoría
-    const filtrosActivos = {};
-    checkboxesFiltro.forEach((chk) => {
-        if (chk.checked) {
-            const grupo = chk.getAttribute("data-grupo");
-            if (!filtrosActivos[grupo]) filtrosActivos[grupo] = [];
-            filtrosActivos[grupo].push(chk.value.toLowerCase());
-        }
-    });
-
-    productos.forEach((prod) => {
+    productos.forEach(function(prod) {
         const nombre = prod.querySelector("h2").textContent.toLowerCase();
         const coincideBusqueda = nombre.includes(textoBusqueda);
 
-        // Verificar si el producto cumple con al menos un valor de cada grupo de filtro activo
-        let coincideFiltros = true;
-        for (const grupo in filtrosActivos) {
-            const valorAtributo = (prod.getAttribute(`data-${grupo}`) || "").toLowerCase();
-            const valoresSeleccionados = filtrosActivos[grupo];
-
-            if (!valoresSeleccionados.includes(valorAtributo)) {
-                coincideFiltros = false;
-                break;
-            }
-        }
-
-        if (coincideBusqueda && coincideFiltros) {
+        if (coincideBusqueda) {
             prod.style.display = "flex";
         } else {
             prod.style.display = "none";
@@ -228,19 +206,7 @@ function aplicarFiltrosYBusqueda() {
 }
 
 if (inputBuscador) {
-    inputBuscador.addEventListener("input", aplicarFiltrosYBusqueda);
-}
-
-checkboxesFiltro.forEach((chk) => {
-    chk.addEventListener("change", aplicarFiltrosYBusqueda);
-});
-
-if (btnLimpiarFiltros) {
-    btnLimpiarFiltros.addEventListener("click", function () {
-        checkboxesFiltro.forEach((chk) => (chk.checked = false));
-        if (inputBuscador) inputBuscador.value = "";
-        aplicarFiltrosYBusqueda();
-    });
+    inputBuscador.addEventListener("input", aplicarBusqueda);
 }
 
 // ==========================================
@@ -397,14 +363,22 @@ const subLinks = document.querySelectorAll(".sub-link");
 subLinks.forEach(function(link) {
     link.addEventListener("click", function(e) {
         e.preventDefault();
-        catLinks.forEach(function(l) { l.classList.remove("activo"); });
+
+        catLinks.forEach(function(l) {
+            l.classList.remove("activo");
+        });
 
         const genero = link.getAttribute("data-genero");
         const tipo = link.getAttribute("data-tipo");
 
         productos.forEach(function(prod) {
-            const coincideGenero = genero === "todos" || prod.getAttribute("data-genero") === genero;
-            const coincideTipo = tipo === "todos" || prod.getAttribute("data-tipo") === tipo;
+            const coincideGenero =
+                genero === "todos" ||
+                prod.getAttribute("data-genero") === genero;
+
+            const coincideTipo =
+                tipo === "todos" ||
+                prod.getAttribute("data-tipo") === tipo;
 
             if (coincideGenero && coincideTipo) {
                 prod.style.display = "flex";
@@ -414,17 +388,17 @@ subLinks.forEach(function(link) {
         });
 
         navCategorias.classList.remove("mostrar-movil");
+
         document.querySelectorAll(".cat-item").forEach(function(item) {
             item.classList.remove("abierto");
-
-            if (catalogo) {
-    catalogo.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-    });
-}
         });
 
+        if (catalogo) {
+            catalogo.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        }
     });
 });
 

@@ -6,6 +6,12 @@
     "public": ".",
     "ignore": [
       "firebase.json",
+      "firestore.rules",
+      "netlify.toml",
+      "package.json",
+      "package-lock.json",
+      "netlify/**",
+      "functions/**",
       "**/.*",
       "**/node_modules/**"
     ]

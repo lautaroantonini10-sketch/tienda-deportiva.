@@ -226,11 +226,7 @@
     const infoUsuarioHeader = document.querySelector("#info-usuario-header");
     const emailUsuario = document.querySelector("#email-usuario");
 
-    document.querySelector("#btn-registrar")?.addEventListener("click", function() {
-        createUserWithEmailAndPassword(window.auth, emailInput.value, passwordInput.value)
-            .then(() => { mensajeAuth.textContent = "¡Cuenta creada con éxito!"; })
-            .catch((error) => { mensajeAuth.textContent = error.message; });
-    });
+    
 
     let modoRegistro = false;
     const btnAuthPrincipal = document.querySelector("#btn-auth-principal");
