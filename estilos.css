@@ -1607,3 +1607,81 @@ h1, h2 {
 #catalogo {
     scroll-margin-top: 90px;
 }
+
+/* ==========================================
+   RESULTADO DE PAGO
+   ========================================== */
+
+.resultado-pago {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    background: #f4f4f4;
+}
+
+.resultado-pago__card {
+    width: 100%;
+    max-width: 520px;
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 40px 28px;
+    text-align: center;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+}
+
+.resultado-pago__icono {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 22px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    font-size: 38px;
+    font-weight: 700;
+    background: #111111;
+    color: #ffffff;
+}
+
+.resultado-pago__card h1 {
+    margin-bottom: 14px;
+    font-size: 2rem;
+}
+
+.resultado-pago__card p {
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+.resultado-pago__detalle {
+    opacity: 0.75;
+}
+
+.resultado-pago__boton {
+    display: inline-block;
+    margin-top: 22px;
+    padding: 13px 24px;
+    border-radius: 999px;
+    background: #111111;
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.resultado-pago__boton:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+@media (max-width: 600px) {
+    .resultado-pago__card {
+        padding: 32px 20px;
+    }
+
+    .resultado-pago__card h1 {
+        font-size: 1.6rem;
+    }
+}
