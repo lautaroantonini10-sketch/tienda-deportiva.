@@ -1,5 +1,16 @@
 const { MercadoPagoConfig, Preference } = require("mercadopago");
 
+const catalogo = {
+  "Zapatillas Running Pro": 45000,
+  "Remeras Deportivas": 25000,
+  "Shorts de Entrenamiento": 30000,
+  "Medias Antideslizantes": 15000,
+  "Botines de Futbol": 60000,
+  "Pelota de Basquet": 20000,
+  "Guantes de Boxeo": 35000,
+  "Camiseta de Ciclismo": 30000
+};
+
 exports.handler = async (event) => {
   const headersCORS = {
     "Access-Control-Allow-Origin": "*",
@@ -21,14 +32,34 @@ exports.handler = async (event) => {
     const datos = JSON.parse(event.body || "{}");
     const carrito = datos.carrito || [];
 
-    const items = carrito.map(function(producto) {
-      return {
-        title: producto.nombre,
-        quantity: producto.cantidad,
-        unit_price: producto.precio,
-        currency_id: "ARS"
-      };
-    });
+    if (!Array.isArray(carrito) || carrito.length === 0) {
+  return {
+    statusCode: 400,
+    headers: headersCORS,
+    body: JSON.stringify({ error: "El carrito está vacío" })
+  };
+}
+
+const items = carrito.map(function(producto) {
+  const precioReal = catalogo[producto.nombre];
+
+  if (!precioReal) {
+    throw new Error("Producto no válido: " + producto.nombre);
+  }
+
+  const cantidad = Number(producto.cantidad);
+
+  if (!Number.isInteger(cantidad) || cantidad < 1 || cantidad > 10) {
+    throw new Error("Cantidad no válida para: " + producto.nombre);
+  }
+
+  return {
+    title: producto.nombre,
+    quantity: cantidad,
+    unit_price: precioReal,
+    currency_id: "ARS"
+  };
+});
 
     const result = await preference.create({
       body: {
