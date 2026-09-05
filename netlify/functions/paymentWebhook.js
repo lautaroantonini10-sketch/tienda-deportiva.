@@ -23,6 +23,14 @@ exports.handler = async (event) => {
 
     const secret = process.env.MP_WEBHOOK_SECRET;
 
+    console.log("Diagnóstico webhook:", {
+  tieneXSignature: Boolean(xSignature),
+  tieneXRequestId: Boolean(xRequestId),
+  queryParams: event.queryStringParameters || {},
+  tieneDataId: Boolean(dataId),
+  tieneSecret: Boolean(secret)
+});
+
     if (!xSignature || !xRequestId || !dataId || !secret) {
       return {
         statusCode: 400,
