@@ -22,3 +22,6 @@ firebase-debug.log*
 # Archivos del sistema
 .DS_Store
 Thumbs.db
+
+# Archivos locales generados por Firebase
+.firebase/

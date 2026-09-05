@@ -210,10 +210,12 @@ if (inputBuscador) {
 }
 
 // ==========================================
-// 5. FINALIZAR COMPRA CON FIREBASE FIRESTORE
+// 5. CHECKOUT CON MERCADO PAGO
 // ==========================================
 if (btnPagar) {
     btnPagar.addEventListener("click", async function () {
+
+        // Evitar checkout con carrito vacío
         if (!Array.isArray(carrito) || carrito.length === 0) {
             if (mensajePago) {
                 mensajePago.textContent = "⚠️ Tu carrito está vacío.";
@@ -222,67 +224,77 @@ if (btnPagar) {
             return;
         }
 
+        // Por ahora mantenemos el requisito de iniciar sesión
         const usuarioLogueado = window.auth && window.auth.currentUser;
 
         if (!usuarioLogueado) {
             if (mensajePago) {
-                mensajePago.textContent = "⚠️ Debes iniciar sesión o registrarte arriba para finalizar la compra.";
+                mensajePago.textContent =
+                    "⚠️ Debes iniciar sesión o registrarte para continuar.";
                 mensajePago.style.color = "#e8a838";
             }
-            document.querySelector("#email-input")?.focus();
+
             return;
         }
 
-        // Estado de carga
+        // El navegador solo manda identificación del producto y cantidad.
+        // El precio verdadero lo decide el backend.
+        const carritoParaEnviar = carrito.map(function(producto) {
+            return {
+                nombre: producto.nombre,
+                cantidad: producto.cantidad || 1
+            };
+        });
+
         btnPagar.disabled = true;
+        btnPagar.textContent = "Cargando Mercado Pago...";
+
         if (mensajePago) {
-            mensajePago.textContent = "Procesando y guardando compra...";
-            mensajePago.style.color = "#333";
+            mensajePago.textContent = "";
         }
 
         try {
-            const totalCompra = carrito.reduce((acc, item) => {
-                const precioNum = parsePrecio(item.precio);
-                return acc + precioNum * (item.cantidad || 1);
-            }, 0);
+            const response = await fetch(
+                "https://calm-tanuki-3fe837.netlify.app/.netlify/functions/createPreference",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        carrito: carritoParaEnviar
+                    })
+                }
+            );
 
-            const nuevaOrden = {
-                usuarioEmail: usuarioLogueado.email,
-                usuarioUid: usuarioLogueado.uid,
-                items: carrito,
-                total: totalCompra,
-                fecha: window.firestoreTools && window.firestoreTools.serverTimestamp
-                    ? window.firestoreTools.serverTimestamp()
-                    : new Date().toISOString()
-            };
+            const data = await response.json();
 
-            if (window.db && window.firestoreTools && window.firestoreTools.addDoc) {
-                await window.firestoreTools.addDoc(
-                    window.firestoreTools.collection(window.db, "compras"),
-                    nuevaOrden
+            if (!response.ok) {
+                throw new Error(
+                    data.error || "No se pudo generar el pago"
                 );
-            } else {
-                throw new Error("Firestore no está inicializado correctamente en window.");
             }
 
-            if (mensajePago) {
-                mensajePago.textContent = `¡Gracias por tu compra, ${usuarioLogueado.email}! Orden guardada con éxito. 🎉`;
-                mensajePago.style.color = "#27ae60";
+            if (!data.init_point) {
+                throw new Error(
+                    "Mercado Pago no devolvió una URL de checkout"
+                );
             }
 
-            // Vaciar el carrito tras la compra exitosa
-            carrito = [];
-            guardarCarritoEnLocalStorage();
-            actualizarCarritoUI();
+            // Redirigir al Checkout Pro
+            window.location.href = data.init_point;
 
         } catch (error) {
-            console.error("Error al registrar la compra:", error);
+            console.error("Error al iniciar Mercado Pago:", error);
+
             if (mensajePago) {
-                mensajePago.textContent = "❌ Ocurrió un error al procesar tu compra. Reintenta más tarde.";
+                mensajePago.textContent =
+                    "❌ No pudimos iniciar el pago. Intentá nuevamente.";
                 mensajePago.style.color = "#d9534f";
             }
-        } finally {
+
             btnPagar.disabled = false;
+            btnPagar.textContent = "Pagar con Mercado Pago";
         }
     });
 }
