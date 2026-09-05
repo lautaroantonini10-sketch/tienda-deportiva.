@@ -3,8 +3,8 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Catálogo: cualquiera puede leerlo,
-    // pero nadie puede modificarlo desde el frontend.
+    // Catálogo: lectura pública.
+    // Las modificaciones no se permiten desde el frontend.
     match /productos/{productoId} {
       allow read: if true;
       allow write: if false;
@@ -13,18 +13,13 @@ service cloud.firestore {
     // Compras
     match /compras/{compraId} {
 
-      // Un usuario autenticado puede crear una compra
-      // solamente a su propio nombre.
-      allow create: if request.auth != null
-                    && request.resource.data.usuarioUid == request.auth.uid;
-
-      // Un usuario solamente puede leer sus propias compras.
+      // Cada usuario autenticado puede leer únicamente sus propias compras.
       allow read: if request.auth != null
                   && resource.data.usuarioUid == request.auth.uid;
 
-      // Por ahora el navegador no puede modificar
-      // ni eliminar compras ya creadas.
-      allow update, delete: if false;
+      // Las compras ahora se crean y modifican exclusivamente
+      // desde el backend mediante Firebase Admin.
+      allow create, update, delete: if false;
     }
   }
 }

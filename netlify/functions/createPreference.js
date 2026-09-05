@@ -24,7 +24,7 @@ exports.handler = async (event) => {
   }
 
   try {
-    
+
   const authHeader =
   event.headers.authorization ||
   event.headers.Authorization;
@@ -41,7 +41,7 @@ if (!authHeader || !authHeader.startsWith("Bearer ")) {
 
 const idToken = authHeader.substring(7);
 
-const { auth } = getFirebaseAdmin();
+const { auth, db } = getFirebaseAdmin();
 
 let usuarioVerificado;
 
@@ -95,23 +95,52 @@ const items = carrito.map(function(producto) {
   };
 });
 
-    const result = await preference.create({
-      body: {
-        items: items,
-        back_urls: {
-          success: "https://tienda-deportiva-b14c3.web.app/success.html",
-          failure: "https://tienda-deportiva-b14c3.web.app/failure.html",
-          pending: "https://tienda-deportiva-b14c3.web.app/pending.html"
-        },
-        auto_return: "approved"
-      }
-    });
+const totalOrden = items.reduce(function(total, item) {
+  return total + item.unit_price * item.quantity;
+}, 0);
 
-    return {
-      statusCode: 200,
-      headers: headersCORS,
-      body: JSON.stringify({ id: result.id, init_point: result.init_point })
-    };
+const itemsOrden = items.map(function(item) {
+  return {
+    nombre: item.title,
+    cantidad: item.quantity,
+    precio: item.unit_price
+  };
+});
+
+const ordenRef = db.collection("compras").doc();
+
+const result = await preference.create({
+  body: {
+    items: items,
+    external_reference: ordenRef.id,
+    back_urls: {
+      success: "https://tienda-deportiva-b14c3.web.app/success.html",
+      failure: "https://tienda-deportiva-b14c3.web.app/failure.html",
+      pending: "https://tienda-deportiva-b14c3.web.app/pending.html"
+    },
+    auto_return: "approved"
+  }
+});
+
+await ordenRef.set({
+  usuarioUid: usuarioVerificado.uid,
+  usuarioEmail: usuarioVerificado.email || null,
+  items: itemsOrden,
+  total: totalOrden,
+  estado: "pending_payment",
+  mercadoPagoPreferenceId: result.id,
+  mercadoPagoPaymentId: null,
+  fecha: new Date()
+});
+
+return {
+  statusCode: 200,
+  headers: headersCORS,
+  body: JSON.stringify({
+    id: result.id,
+    init_point: result.init_point
+  })
+};
 
   } catch (error) {
     console.error("Error al crear la preferencia:", error);
