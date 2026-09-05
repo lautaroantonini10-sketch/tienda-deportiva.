@@ -1,4 +1,5 @@
 const { MercadoPagoConfig, Preference } = require("mercadopago");
+const { getFirebaseAdmin } = require("../lib/firebaseAdmin");
 
 const catalogo = {
   "Zapatillas Running Pro": 45000,
@@ -14,7 +15,7 @@ const catalogo = {
 exports.handler = async (event) => {
   const headersCORS = {
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
     "Access-Control-Allow-Methods": "POST, OPTIONS"
   };
 
@@ -23,6 +24,39 @@ exports.handler = async (event) => {
   }
 
   try {
+    
+  const authHeader =
+  event.headers.authorization ||
+  event.headers.Authorization;
+
+if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  return {
+    statusCode: 401,
+    headers: headersCORS,
+    body: JSON.stringify({
+      error: "Usuario no autenticado"
+    })
+  };
+}
+
+const idToken = authHeader.substring(7);
+
+const { auth } = getFirebaseAdmin();
+
+let usuarioVerificado;
+
+try {
+  usuarioVerificado = await auth.verifyIdToken(idToken);
+} catch (error) {
+  return {
+    statusCode: 401,
+    headers: headersCORS,
+    body: JSON.stringify({
+      error: "Sesión inválida o vencida"
+    })
+  };
+}
+
     const client = new MercadoPagoConfig({
       accessToken: process.env.MP_ACCESS_TOKEN
     });

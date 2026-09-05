@@ -254,13 +254,16 @@ if (btnPagar) {
         }
 
         try {
+
+            const idToken = await usuarioLogueado.getIdToken();
             const response = await fetch(
                 "https://calm-tanuki-3fe837.netlify.app/.netlify/functions/createPreference",
                 {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json"
-                    },
+                       "Content-Type": "application/json",
+                       "Authorization": "Bearer " + idToken
+                     },
                     body: JSON.stringify({
                         carrito: carritoParaEnviar
                     })
