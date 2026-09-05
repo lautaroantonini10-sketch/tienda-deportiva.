@@ -1,5 +1,9 @@
+const {
+  WebhookSignatureValidator,
+  InvalidWebhookSignatureError
+} = require("mercadopago");
+
 exports.handler = async (event) => {
-  // Mercado Pago debe llamar a esta función mediante POST.
   if (event.httpMethod !== "POST") {
     return {
       statusCode: 405,
@@ -10,12 +14,52 @@ exports.handler = async (event) => {
   }
 
   try {
+    const xSignature = event.headers["x-signature"];
+    const xRequestId = event.headers["x-request-id"];
+
+    const dataId =
+      event.queryStringParameters?.["data.id"] ||
+      event.queryStringParameters?.data_id;
+
+    const secret = process.env.MP_WEBHOOK_SECRET;
+
+    if (!xSignature || !xRequestId || !dataId || !secret) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          error: "Faltan datos para validar la notificación"
+        })
+      };
+    }
+
+    try {
+      WebhookSignatureValidator.validate({
+        xSignature,
+        xRequestId,
+        dataId,
+        secret
+      });
+    } catch (error) {
+      if (error instanceof InvalidWebhookSignatureError) {
+        console.warn("Webhook rechazado: firma inválida");
+
+        return {
+          statusCode: 401,
+          body: JSON.stringify({
+            error: "Firma inválida"
+          })
+        };
+      }
+
+      throw error;
+    }
+
     const body = JSON.parse(event.body || "{}");
 
-    console.log("Webhook de Mercado Pago recibido:", {
+    console.log("Webhook válido recibido:", {
       type: body.type,
       action: body.action,
-      dataId: body.data?.id
+      dataId
     });
 
     return {
@@ -29,9 +73,9 @@ exports.handler = async (event) => {
     console.error("Error procesando webhook:", error);
 
     return {
-      statusCode: 400,
+      statusCode: 500,
       body: JSON.stringify({
-        error: "Notificación inválida"
+        error: "Error interno"
       })
     };
   }
