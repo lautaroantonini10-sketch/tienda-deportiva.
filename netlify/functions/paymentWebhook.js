@@ -5,6 +5,8 @@ const {
   InvalidWebhookSignatureError
 } = require("mercadopago");
 
+const { getFirebaseAdmin } = require("../lib/firebaseAdmin");
+
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
@@ -26,13 +28,7 @@ exports.handler = async (event) => {
 
     const secret = process.env.MP_WEBHOOK_SECRET;
 
-    console.log("Diagnóstico webhook:", {
-  tieneXSignature: Boolean(xSignature),
-  tieneXRequestId: Boolean(xRequestId),
-  queryParams: event.queryStringParameters || {},
-  tieneDataId: Boolean(dataId),
-  tieneSecret: Boolean(secret)
-});
+    
 
     if (!xSignature || !xRequestId || !dataId || !secret) {
       return {
@@ -66,21 +62,92 @@ exports.handler = async (event) => {
     }
 
     const client = new MercadoPagoConfig({
-  accessToken: process.env.MP_ACCESS_TOKEN
+     accessToken: process.env.MP_ACCESS_TOKEN
 });
 
-const paymentClient = new Payment(client);
+    const paymentClient = new Payment(client);
 
-const payment = await paymentClient.get({
-  id: dataId
+    const payment = await paymentClient.get({
+     id: dataId
 });
 
-console.log("Pago consultado en Mercado Pago:", {
-  id: payment.id,
-  status: payment.status,
-  statusDetail: payment.status_detail,
-  transactionAmount: payment.transaction_amount
+    console.log("Pago consultado en Mercado Pago:", {
+     id: payment.id,
+     status: payment.status,
+     statusDetail: payment.status_detail,
+     transactionAmount: payment.transaction_amount
 });
+
+    const externalReference = payment.external_reference;
+
+if (!externalReference) {
+  console.log("Pago sin external_reference. Se ignora.");
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      received: true,
+      ignored: "missing_external_reference"
+    })
+  };
+}
+
+const { db } = getFirebaseAdmin();
+
+const ordenRef = db.collection("compras").doc(externalReference);
+const ordenDoc = await ordenRef.get();
+
+if (!ordenDoc.exists) {
+  console.warn(
+    "No existe una orden para external_reference:",
+    externalReference
+  );
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      received: true,
+      ignored: "order_not_found"
+    })
+  };
+}
+
+const orden = ordenDoc.data();
+
+const montoPago = Number(payment.transaction_amount);
+const montoOrden = Number(orden.total);
+
+if (montoPago !== montoOrden) {
+  console.error("El monto del pago no coincide con la orden:", {
+    montoPago,
+    montoOrden,
+    externalReference
+  });
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      received: true,
+      ignored: "amount_mismatch"
+    })
+  };
+}
+
+if (
+  payment.status === "approved" &&
+  payment.status_detail === "accredited"
+) {
+  await ordenRef.update({
+    estado: "approved",
+    mercadoPagoPaymentId: String(payment.id),
+    fechaPago: new Date()
+  });
+
+  console.log("Orden aprobada en Firestore:", {
+    ordenId: externalReference,
+    paymentId: payment.id
+  });
+}
 
     const body = JSON.parse(event.body || "{}");
 
