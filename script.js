@@ -325,26 +325,39 @@ if (btnMisCompras) {
         );
         const resultado = await getDocs(consulta);
 
-        if (resultado.empty) {
-            contenedorHistorial.innerHTML = "<p>Todavía no hiciste ninguna compra.</p>";
-            return;
-        }
+        const comprasAprobadas = resultado.docs
+    .map(function(doc) {
+        return doc.data();
+    })
+    .filter(function(compra) {
+        return compra.estado === "approved";
+    });
 
-        contenedorHistorial.innerHTML = "";
-        resultado.forEach(function(doc) {
-            const compra = doc.data();
+if (comprasAprobadas.length === 0) {
+    contenedorHistorial.innerHTML = "<p>Todavía no tenés compras aprobadas.</p>";
+    return;
+}
 
-            let itemsTexto = "";
-            compra.items.forEach(function(item) {
-                itemsTexto += "<li>" + item.nombre + " x" + item.cantidad + "</li>";
-            });
+contenedorHistorial.innerHTML = "";
 
-            const divCompra = document.createElement("div");
-            divCompra.className = "compra-item";
-            divCompra.innerHTML = "<ul>" + itemsTexto + "</ul><p class='compra-total'>Total: $" + Number(compra.total).toLocaleString("es-AR") + "</p>";
+comprasAprobadas.forEach(function(compra) {
+    let itemsTexto = "";
 
-            contenedorHistorial.appendChild(divCompra);
-        });
+    compra.items.forEach(function(item) {
+        itemsTexto += "<li>" + item.nombre + " x" + item.cantidad + "</li>";
+    });
+
+    const divCompra = document.createElement("div");
+    divCompra.className = "compra-item";
+
+    divCompra.innerHTML =
+        "<ul>" + itemsTexto + "</ul>" +
+        "<p class='compra-total'>Total: $" +
+        Number(compra.total).toLocaleString("es-AR") +
+        "</p>";
+
+    contenedorHistorial.appendChild(divCompra);
+});
     });
 }
 
