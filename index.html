@@ -6,7 +6,7 @@
     <title>Tienda Deportiva</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="estilos.css?v=20260907">
+    <link rel="stylesheet" href="estilos.css?v=20260908">
 </head>
 <body>
 
@@ -28,33 +28,118 @@
     <button id="btn-menu-movil" aria-label="Menú">☰</button>
 
     <nav class="categorias-nav" id="nav-categorias">
-        <div class="cat-item">
-            <button class="cat-link activo" data-genero="todos">Destacados</button>
+
+    <!-- DESTACADOS -->
+    <div class="cat-item">
+ <button
+    class="cat-link activo"
+    data-genero="todos"
+    data-destacados="true">
+    Destacados
+</button>
+    </div>
+
+
+    <!-- HOMBRE -->
+    <div class="cat-item">
+        <button class="cat-link" data-genero="hombre">
+            Hombre
+        </button>
+
+        <div class="submenu">
+            <a href="#"
+               class="sub-link"
+               data-genero="hombre"
+               data-tipo="todos">
+                Ver todo
+            </a>
+
+            <a href="#"
+               class="sub-link"
+               data-genero="hombre"
+               data-tipo="zapatillas">
+                Zapatillas
+            </a>
+
+            <a href="#"
+               class="sub-link"
+               data-genero="hombre"
+               data-tipo="indumentaria">
+                Indumentaria
+            </a>
         </div>
-        <div class="cat-item">
-            <button class="cat-link" data-genero="hombre">Hombre</button>
-            <div class="submenu">
-                <a href="#" class="sub-link" data-genero="hombre" data-tipo="todos">Ver todo</a>
-                <a href="#" class="sub-link" data-genero="hombre" data-tipo="zapatillas">Zapatillas</a>
-                <a href="#" class="sub-link" data-genero="hombre" data-tipo="indumentaria">Indumentaria</a>
-            </div>
+    </div>
+
+
+    <!-- MUJER -->
+    <div class="cat-item">
+        <button class="cat-link" data-genero="mujer">
+            Mujer
+        </button>
+
+        <div class="submenu">
+            <a href="#"
+               class="sub-link"
+               data-genero="mujer"
+               data-tipo="todos">
+                Ver todo
+            </a>
+
+            <a href="#"
+               class="sub-link"
+               data-genero="mujer"
+               data-tipo="zapatillas">
+                Zapatillas
+            </a>
+
+            <a href="#"
+               class="sub-link"
+               data-genero="mujer"
+               data-tipo="indumentaria">
+                Indumentaria
+            </a>
         </div>
-        <div class="cat-item">
-            <button class="cat-link" data-genero="mujer">Mujer</button>
-            <div class="submenu">
-                <a href="#" class="sub-link" data-genero="mujer" data-tipo="todos">Ver todo</a>
-                <a href="#" class="sub-link" data-genero="mujer" data-tipo="indumentaria">Indumentaria</a>
-            </div>
+    </div>
+
+
+    <!-- UNISEX -->
+    <div class="cat-item">
+        <button class="cat-link" data-genero="unisex">
+            Unisex
+        </button>
+
+        <div class="submenu">
+            <a href="#"
+               class="sub-link"
+               data-genero="unisex"
+               data-tipo="todos">
+                Ver todo
+            </a>
+
+            <a href="#"
+               class="sub-link"
+               data-genero="unisex"
+               data-tipo="zapatillas">
+                Zapatillas
+            </a>
+
+            <a href="#"
+               class="sub-link"
+               data-genero="unisex"
+               data-tipo="indumentaria">
+                Indumentaria
+            </a>
+
+            <a href="#"
+               class="sub-link"
+               data-genero="unisex"
+               data-tipo="equipamiento">
+                Equipamiento
+            </a>
         </div>
-        <div class="cat-item">
-            <button class="cat-link" data-genero="unisex">Unisex</button>
-            <div class="submenu">
-                <a href="#" class="sub-link" data-genero="unisex" data-tipo="todos">Ver todo</a>
-                <a href="#" class="sub-link" data-genero="unisex" data-tipo="zapatillas">Zapatillas</a>
-                <a href="#" class="sub-link" data-genero="unisex" data-tipo="accesorios">Accesorios</a>
-            </div>
-        </div>
-    </nav>
+    </div>
+
+</nav>
 
     <div class="header-derecha">
         <button id="btn-buscar-movil" aria-label="Buscar">
@@ -167,8 +252,8 @@
 
 <section class="hero-banner">
     <img
-    src="img/optimizado/pexels-jishnu-radhakrishnan-716503-1554099.jpg"
-    alt="Equipamiento deportivo"
+    src="img/optimizado/hero/hero-zapatilla.webp"
+    alt="Zapatilla deportiva"
     fetchpriority="high"
     decoding="async"
     >
@@ -199,6 +284,49 @@
     </div>
 </div>
 
+<!-- DESTACADOS HORIZONTALES -->
+<section id="destacados-carrusel" class="destacados-carrusel" hidden>
+
+    <div class="destacados-encabezado">
+        <div>
+            <span class="destacados-kicker">
+                SELECCIÓN DESTACADA
+            </span>
+
+            <h2>
+                LO MEJOR DE LA COLECCIÓN
+            </h2>
+        </div>
+    </div>
+
+    <div class="destacados-slider">
+
+        <button
+            id="destacados-anterior"
+            class="destacados-flecha"
+            type="button"
+            aria-label="Ver productos destacados anteriores">
+            ←
+        </button>
+
+        <div
+            id="destacados-track"
+            class="destacados-track"
+            aria-label="Productos destacados">
+        </div>
+
+        <button
+            id="destacados-siguiente"
+            class="destacados-flecha"
+            type="button"
+            aria-label="Ver más productos destacados">
+            →
+        </button>
+
+    </div>
+
+</section>
+
 <section class="catalogo-encabezado">
 
     <div class="catalogo-titulo revelar-izquierda">
@@ -227,127 +355,884 @@
 
         <!-- CATÁLOGO -->
         <div class="catalogo" id="catalogo">
-            <div class="producto" data-genero="unisex" data-tipo="zapatillas" data-categoria="running" data-talle="42">
-                <div class="imagen-producto">
-            <img src="img/optimizado/mostafa-mahmoudi-W_uDEmTq0po-unsplash.jpg"
-                 alt="Zapatillas running"
+
+    <!-- 01 · VELOCITY AURA -->
+    <div class="producto"
+         data-genero="mujer"
+         data-tipo="zapatillas"
+         data-categoria="running"
+         data-talle="36-40"
+         data-destacado="true">
+
+        <div class="imagen-producto">
+            <img src="img/optimizado/calzado/zapatilla1.webp"
+                 alt="Zapatillas Velocity Aura"
                  loading="lazy"
-                 decoding="async"
-                 >
+                 decoding="async">
             <span class="etiqueta-producto">DESTACADO</span>
-                </div>
-                <h2>Zapatillas Running Pro</h2>
-                <p class="detalle">Talle 42 · Running</p>
-            <div class="producto-acciones">
-                 <p class="precio">$45.000</p>
-                 <button>Agregar al carrito</button>
-              </div>
-            </div>
-
-            <div class="producto" data-genero="hombre" data-tipo="indumentaria" data-categoria="deportivas" data-talle="M">
-                <div class="imagen-producto">
-             <img src="img/optimizado/tuananh-blue-Jv0EjfH3Z5Y-unsplash.jpg"
-                  alt="Remeras deportivas"
-                  loading="lazy"
-                  decoding="async"
-                  >
-             <span class="etiqueta-producto etiqueta-nuevo">NUEVO</span>
-                </div>
-                <h2>Remeras Deportivas</h2>
-                <p class="detalle">Talle M · Deportivas</p>
-                <div class="producto-acciones">
-                    <p class="precio">$25.000</p>
-                    <button>Agregar al carrito</button>
-                </div>
-            </div>
-
-            <div class="producto" data-genero="hombre" data-tipo="indumentaria" data-categoria="entrenamiento" data-talle="L">
-                <img src="img/optimizado/tuananh-blue-IRMsL4IVGWY-unsplash.jpg"
-                     alt="Shorts de entrenamiento"
-                     loading="lazy"
-                     decoding="async"
-                     >
-                <h2>Shorts de Entrenamiento</h2>
-                <p class="detalle">Talle L · Entrenamiento</p>
-                <div class="producto-acciones">
-                    <p class="precio">$30.000</p>
-                    <button>Agregar al carrito</button>
-                </div>
-            </div>
-
-            <div class="producto" data-genero="unisex" data-tipo="accesorios" data-categoria="running" data-talle="S">
-                <img src="img/optimizado/sam-moghadam-Y0lUBKt-AZI-unsplash.jpg"
-                     alt="Medias antideslizantes"
-                     loading="lazy"
-                     decoding="async"
-                    >
-                <h2>Medias Antideslizantes</h2>
-                <p class="detalle">Talle S · Antideslizantes</p>
-                <div class="producto-acciones">
-                    <p class="precio">$15.000</p>
-                    <button>Agregar al carrito</button>
-                </div>
-            </div>
-
-            <div class="producto" data-genero="hombre" data-tipo="zapatillas" data-categoria="futbol" data-talle="42">
-                <div class="imagen-producto">
-            <img src="img/optimizado/braden-hopkins-sC-AbZG-Sec-unsplash.jpg"
-                 alt="Botines de futbol"
-                 loading="lazy"
-                 decoding="async"
-                 >
-            <span class="etiqueta-producto etiqueta-oferta">OFERTA</span>
-                </div>
-                <h2>Botines de Futbol</h2>
-                <p class="detalle">Talle 42 · Futbol</p>
-                <div class="producto-acciones">
-                    <p class="precio">$60.000</p>
-                    <button>Agregar al carrito</button>
-                </div>
-            </div>
-
-            <div class="producto" data-genero="unisex" data-tipo="accesorios" data-categoria="basquet" data-talle="M">
-                <img src="img/optimizado/bailey-burton-o5UlVmTwVz8-unsplash.jpg"
-                     alt="Pelota de Basquet"
-                     loading="lazy"
-                     decoding="async"
-                     >
-                <h2>Pelota de Basquet</h2>
-                <p class="detalle">Talle M · Basquet</p>
-                <div class="producto-acciones">
-                    <p class="precio">$20.000</p>
-                    <button>Agregar al carrito</button>
-                </div>
-            </div>
-
-            <div class="producto" data-genero="unisex" data-tipo="accesorios" data-categoria="boxeo" data-talle="M">
-                <img src="img/optimizado/zane-burko-yYQwAKTN_34-unsplash.jpg"
-                 alt="Guantes de boxeo"
-                 loading="lazy"
-                 decoding="async"
-                 >
-                <h2>Guantes de Boxeo</h2>
-                <p class="detalle">Talle M · Boxeo</p>
-                <div class="producto-acciones">
-                    <p class="precio">$35.000</p>
-                    <button>Agregar al carrito</button>
-                </div>
-            </div>
-
-            <div class="producto" data-genero="mujer" data-tipo="indumentaria" data-categoria="ciclismo" data-talle="L">
-                <img src="img/optimizado/munbaik-cycling-clothing-QJjOKSRLsh0-unsplash.jpg"
-                     alt="Camiseta de ciclismo"
-                     loading="lazy"
-                     decoding="async"
-                     >
-                <h2>Camiseta de Ciclismo</h2>
-                <p class="detalle">Talle L · Ciclismo</p>
-                <div class="producto-acciones">
-                    <p class="precio">$30.000</p>
-                    <button>Agregar al carrito</button>
-                </div>
-            </div>
         </div>
+
+        <h2>Velocity Aura</h2>
+        <p class="detalle">Talles 36–40 · Running</p>
+
+        <div class="producto-acciones">
+            <p class="precio">$48.000</p>
+            <button>Agregar al carrito</button>
+        </div>
+    </div>
+
+
+    <!-- 02 · TERRA SHIFT -->
+    <div class="producto"
+         data-genero="unisex"
+         data-tipo="zapatillas"
+         data-categoria="urbano"
+         data-talle="36-44"
+         data-destacado="true">
+
+        <div class="imagen-producto">
+            <img src="img/optimizado/calzado/zapatilla3.webp"
+                 alt="Zapatillas Terra Shift"
+                 loading="lazy"
+                 decoding="async">
+            <span class="etiqueta-producto">DESTACADO</span>
+        </div>
+
+        <h2>Terra Shift</h2>
+        <p class="detalle">Talles 36–44 · Urbano</p>
+
+        <div class="producto-acciones">
+            <p class="precio">$46.000</p>
+            <button>Agregar al carrito</button>
+        </div>
+    </div>
+
+
+    <!-- 03 · STRIKE PHANTOM -->
+    <div class="producto"
+         data-genero="hombre"
+         data-tipo="zapatillas"
+         data-categoria="futbol"
+         data-talle="39-44"
+         data-destacado="true">
+
+        <div class="imagen-producto">
+            <img src="img/optimizado/calzado/botines1.webp"
+                 alt="Botines Strike Phantom"
+                 loading="lazy"
+                 decoding="async">
+            <span class="etiqueta-producto">DESTACADO</span>
+        </div>
+
+        <h2>Strike Phantom</h2>
+        <p class="detalle">Talles 39–44 · Fútbol</p>
+
+        <div class="producto-acciones">
+            <p class="precio">$62.000</p>
+            <button>Agregar al carrito</button>
+        </div>
+    </div>
+
+
+    <!-- 04 · COURT ELEVATE -->
+    <div class="producto"
+         data-genero="hombre"
+         data-tipo="zapatillas"
+         data-categoria="basquet"
+         data-talle="39-45"
+         data-destacado="true">
+
+        <div class="imagen-producto">
+            <img src="img/optimizado/calzado/zapatillabasquet1.webp"
+                 alt="Zapatillas de básquet Court Elevate"
+                 loading="lazy"
+                 decoding="async">
+            <span class="etiqueta-producto">DESTACADO</span>
+        </div>
+
+        <h2>Court Elevate</h2>
+        <p class="detalle">Talles 39–45 · Básquet</p>
+
+        <div class="producto-acciones">
+            <p class="precio">$68.000</p>
+            <button>Agregar al carrito</button>
+        </div>
+    </div>
+
+
+    <!-- 05 · FLEX SCULPT LEGGING -->
+    <div class="producto"
+         data-genero="mujer"
+         data-tipo="indumentaria"
+         data-categoria="entrenamiento"
+         data-talle="XS-L"
+         data-destacado="true">
+
+        <div class="imagen-producto">
+            <img src="img/optimizado/indumentaria/calzamujer1.webp"
+                 alt="Calza Flex Sculpt Legging"
+                 loading="lazy"
+                 decoding="async">
+            <span class="etiqueta-producto">DESTACADO</span>
+        </div>
+
+        <h2>Flex Sculpt Legging</h2>
+        <p class="detalle">Talles XS–L · Entrenamiento</p>
+
+        <div class="producto-acciones">
+            <p class="precio">$38.000</p>
+            <button>Agregar al carrito</button>
+        </div>
+    </div>
+
+
+    <!-- 06 · AERO SHIELD JACKET -->
+    <div class="producto"
+         data-genero="unisex"
+         data-tipo="indumentaria"
+         data-categoria="outdoor"
+         data-talle="S-XL"
+         data-destacado="true">
+
+        <div class="imagen-producto">
+            <img src="img/optimizado/indumentaria/camperaunisex2.webp"
+                 alt="Campera Aero Shield Jacket"
+                 loading="lazy"
+                 decoding="async">
+            <span class="etiqueta-producto">DESTACADO</span>
+        </div>
+
+        <h2>Aero Shield Jacket</h2>
+        <p class="detalle">Talles S–XL · Outdoor</p>
+
+        <div class="producto-acciones">
+            <p class="precio">$62.000</p>
+            <button>Agregar al carrito</button>
+        </div>
+    </div>
+
+
+    <!-- 07 · AERO RIDE HELMET -->
+    <div class="producto"
+         data-genero="unisex"
+         data-tipo="equipamiento"
+         data-categoria="ciclismo"
+         data-talle="M-L"
+         data-destacado="true">
+
+        <div class="imagen-producto">
+            <img src="img/optimizado/equipamiento/cascociclismo.webp"
+                 alt="Casco Aero Ride Helmet"
+                 loading="lazy"
+                 decoding="async">
+            <span class="etiqueta-producto">DESTACADO</span>
+        </div>
+
+        <h2>Aero Ride Helmet</h2>
+        <p class="detalle">Talle M/L · Ciclismo</p>
+
+        <div class="producto-acciones">
+            <p class="precio">$52.000</p>
+            <button>Agregar al carrito</button>
+        </div>
+    </div>
+
+
+    <!-- 08 · POWER ADJUST DUMBBELL -->
+    <div class="producto"
+         data-genero="unisex"
+         data-tipo="equipamiento"
+         data-categoria="fuerza"
+         data-talle="ajustable"
+         data-destacado="true">
+
+        <div class="imagen-producto">
+            <img src="img/optimizado/equipamiento/mancuerna1.webp"
+                 alt="Mancuerna Power Adjust Dumbbell"
+                 loading="lazy"
+                 decoding="async">
+            <span class="etiqueta-producto">DESTACADO</span>
+        </div>
+
+        <h2>Power Adjust Dumbbell</h2>
+        <p class="detalle">Ajustable · Fuerza</p>
+
+        <div class="producto-acciones">
+            <p class="precio">$69.000</p>
+            <button>Agregar al carrito</button>
+        </div>
+    </div>
+
+    <!-- 09 · APEX TRAINER -->
+<div class="producto"
+     data-genero="hombre"
+     data-tipo="zapatillas"
+     data-categoria="entrenamiento"
+     data-talle="39-44">
+
+    <div class="imagen-producto">
+        <img src="img/optimizado/calzado/zapatilla2.webp"
+             alt="Zapatillas Apex Trainer"
+             loading="lazy"
+             decoding="async">
+    </div>
+
+    <h2>Apex Trainer</h2>
+    <p class="detalle">Talles 39–44 · Entrenamiento</p>
+
+    <div class="producto-acciones">
+        <p class="precio">$52.000</p>
+        <button>Agregar al carrito</button>
+    </div>
+</div>
+
+
+<!-- 10 · PULSE FLOW -->
+<div class="producto"
+     data-genero="mujer"
+     data-tipo="zapatillas"
+     data-categoria="entrenamiento"
+     data-talle="35-40">
+
+    <div class="imagen-producto">
+        <img src="img/optimizado/calzado/zapatilla4.webp"
+             alt="Zapatillas Pulse Flow"
+             loading="lazy"
+             decoding="async">
+    </div>
+
+    <h2>Pulse Flow</h2>
+    <p class="detalle">Talles 35–40 · Entrenamiento</p>
+
+    <div class="producto-acciones">
+        <p class="precio">$50.000</p>
+        <button>Agregar al carrito</button>
+    </div>
+</div>
+
+
+<!-- 11 · ENDURANCE X -->
+<div class="producto"
+     data-genero="hombre"
+     data-tipo="zapatillas"
+     data-categoria="running"
+     data-talle="39-45">
+
+    <div class="imagen-producto">
+        <img src="img/optimizado/calzado/zapatilla5.webp"
+             alt="Zapatillas Endurance X"
+             loading="lazy"
+             decoding="async">
+    </div>
+
+    <h2>Endurance X</h2>
+    <p class="detalle">Talles 39–45 · Running</p>
+
+    <div class="producto-acciones">
+        <p class="precio">$56.000</p>
+        <button>Agregar al carrito</button>
+    </div>
+</div>
+
+
+<!-- 12 · MOTION CORE -->
+<div class="producto"
+     data-genero="unisex"
+     data-tipo="zapatillas"
+     data-categoria="running"
+     data-talle="36-44">
+
+    <div class="imagen-producto">
+        <img src="img/optimizado/calzado/zapatilla6.webp"
+             alt="Zapatillas Motion Core"
+             loading="lazy"
+             decoding="async">
+    </div>
+
+    <h2>Motion Core</h2>
+    <p class="detalle">Talles 36–44 · Running</p>
+
+    <div class="producto-acciones">
+        <p class="precio">$49.000</p>
+        <button>Agregar al carrito</button>
+    </div>
+</div>
+
+
+<!-- 13 · NOVA CONTROL -->
+<div class="producto"
+     data-genero="mujer"
+     data-tipo="zapatillas"
+     data-categoria="futbol"
+     data-talle="36-40">
+
+    <div class="imagen-producto">
+        <img src="img/optimizado/calzado/botines2.webp"
+             alt="Botines Nova Control"
+             loading="lazy"
+             decoding="async">
+    </div>
+
+    <h2>Nova Control</h2>
+    <p class="detalle">Talles 36–40 · Fútbol</p>
+
+    <div class="producto-acciones">
+        <p class="precio">$59.000</p>
+        <button>Agregar al carrito</button>
+    </div>
+</div>
+
+
+<!-- 14 · FIELD PRO X -->
+<div class="producto"
+     data-genero="unisex"
+     data-tipo="zapatillas"
+     data-categoria="futbol"
+     data-talle="37-44">
+
+    <div class="imagen-producto">
+        <img src="img/optimizado/calzado/botines3.webp"
+             alt="Botines Field Pro X"
+             loading="lazy"
+             decoding="async">
+    </div>
+
+    <h2>Field Pro X</h2>
+    <p class="detalle">Talles 37–44 · Fútbol</p>
+
+    <div class="producto-acciones">
+        <p class="precio">$64.000</p>
+        <button>Agregar al carrito</button>
+    </div>
+</div>
+
+
+<!-- 15 · COURT PULSE -->
+<div class="producto"
+     data-genero="mujer"
+     data-tipo="zapatillas"
+     data-categoria="basquet"
+     data-talle="36-41">
+
+    <div class="imagen-producto">
+        <img src="img/optimizado/calzado/zapatillabasquet2.webp"
+             alt="Zapatillas de básquet Court Pulse"
+             loading="lazy"
+             decoding="async">
+    </div>
+
+    <h2>Court Pulse</h2>
+    <p class="detalle">Talles 36–41 · Básquet</p>
+
+    <div class="producto-acciones">
+        <p class="precio">$65.000</p>
+        <button>Agregar al carrito</button>
+    </div>
+</div>
+
+
+<!-- 16 · HOOP DYNAMIC -->
+<div class="producto"
+     data-genero="unisex"
+     data-tipo="zapatillas"
+     data-categoria="basquet"
+     data-talle="37-45">
+
+    <div class="imagen-producto">
+        <img src="img/optimizado/calzado/zapatillabasquet3.webp"
+             alt="Zapatillas de básquet Hoop Dynamic"
+             loading="lazy"
+             decoding="async">
+    </div>
+
+    <h2>Hoop Dynamic</h2>
+    <p class="detalle">Talles 37–45 · Básquet</p>
+
+    <div class="producto-acciones">
+        <p class="precio">$70.000</p>
+        <button>Agregar al carrito</button>
+    </div>
+</div>
+
+<!-- 17 · CORE MOTION HOODIE -->
+<div class="producto"
+     data-genero="unisex"
+     data-tipo="indumentaria"
+     data-categoria="urbano"
+     data-talle="S-XL">
+
+    <div class="imagen-producto">
+        <img src="img/optimizado/indumentaria/buzounisex1.webp"
+             alt="Buzo Core Motion Hoodie"
+             loading="lazy"
+             decoding="async">
+    </div>
+
+    <h2>Core Motion Hoodie</h2>
+    <p class="detalle">Talles S–XL · Urbano</p>
+
+    <div class="producto-acciones">
+        <p class="precio">$44.000</p>
+        <button>Agregar al carrito</button>
+    </div>
+</div>
+
+
+<!-- 18 · STORM ACTIVE JACKET -->
+<div class="producto"
+     data-genero="hombre"
+     data-tipo="indumentaria"
+     data-categoria="outdoor"
+     data-talle="S-XL">
+
+    <div class="imagen-producto">
+        <img src="img/optimizado/indumentaria/camperahombre1.webp"
+             alt="Campera Storm Active Jacket"
+             loading="lazy"
+             decoding="async">
+    </div>
+
+    <h2>Storm Active Jacket</h2>
+    <p class="detalle">Talles S–XL · Outdoor</p>
+
+    <div class="producto-acciones">
+        <p class="precio">$58.000</p>
+        <button>Agregar al carrito</button>
+    </div>
+</div>
+
+
+<!-- 19 · URBAN PERFORMANCE JACKET -->
+<div class="producto"
+     data-genero="unisex"
+     data-tipo="indumentaria"
+     data-categoria="urbano"
+     data-talle="S-XL">
+
+    <div class="imagen-producto">
+        <img src="img/optimizado/indumentaria/camperaunisex1.webp"
+             alt="Campera Urban Performance Jacket"
+             loading="lazy"
+             decoding="async">
+    </div>
+
+    <h2>Urban Performance Jacket</h2>
+    <p class="detalle">Talles S–XL · Urbano</p>
+
+    <div class="producto-acciones">
+        <p class="precio">$54.000</p>
+        <button>Agregar al carrito</button>
+    </div>
+</div>
+
+
+<!-- 20 · MOTION TRACK PANT -->
+<div class="producto"
+     data-genero="unisex"
+     data-tipo="indumentaria"
+     data-categoria="entrenamiento"
+     data-talle="S-XL">
+
+    <div class="imagen-producto">
+        <img src="img/optimizado/indumentaria/pantalondebuzo1.webp"
+             alt="Pantalón Motion Track Pant"
+             loading="lazy"
+             decoding="async">
+    </div>
+
+    <h2>Motion Track Pant</h2>
+    <p class="detalle">Talles S–XL · Entrenamiento</p>
+
+    <div class="producto-acciones">
+        <p class="precio">$42.000</p>
+        <button>Agregar al carrito</button>
+    </div>
+</div>
+
+
+<!-- 21 · PERFORMANCE DRY TEE -->
+<div class="producto"
+     data-genero="hombre"
+     data-tipo="indumentaria"
+     data-categoria="entrenamiento"
+     data-talle="S-XL">
+
+    <div class="imagen-producto">
+        <img src="img/optimizado/indumentaria/remeradeportivahombre1.webp"
+             alt="Remera Performance Dry Tee"
+             loading="lazy"
+             decoding="async">
+    </div>
+
+    <h2>Performance Dry Tee</h2>
+    <p class="detalle">Talles S–XL · Entrenamiento</p>
+
+    <div class="producto-acciones">
+        <p class="precio">$29.000</p>
+        <button>Agregar al carrito</button>
+    </div>
+</div>
+
+
+<!-- 22 · PULSE FIT TEE -->
+<div class="producto"
+     data-genero="mujer"
+     data-tipo="indumentaria"
+     data-categoria="running"
+     data-talle="XS-L">
+
+    <div class="imagen-producto">
+        <img src="img/optimizado/indumentaria/remeradeportivamujer1.webp"
+             alt="Remera Pulse Fit Tee"
+             loading="lazy"
+             decoding="async">
+    </div>
+
+    <h2>Pulse Fit Tee</h2>
+    <p class="detalle">Talles XS–L · Running</p>
+
+    <div class="producto-acciones">
+        <p class="precio">$29.000</p>
+        <button>Agregar al carrito</button>
+    </div>
+</div>
+
+
+<!-- 23 · THERMAL PRO BASE -->
+<div class="producto"
+     data-genero="hombre"
+     data-tipo="indumentaria"
+     data-categoria="entrenamiento"
+     data-talle="S-XL">
+
+    <div class="imagen-producto">
+        <img src="img/optimizado/indumentaria/remeratermicahombre1.webp"
+             alt="Remera térmica Thermal Pro Base"
+             loading="lazy"
+             decoding="async">
+    </div>
+
+    <h2>Thermal Pro Base</h2>
+    <p class="detalle">Talles S–XL · Entrenamiento</p>
+
+    <div class="producto-acciones">
+        <p class="precio">$36.000</p>
+        <button>Agregar al carrito</button>
+    </div>
+</div>
+
+
+<!-- 24 · THERMAL FLEX BASE -->
+<div class="producto"
+     data-genero="mujer"
+     data-tipo="indumentaria"
+     data-categoria="entrenamiento"
+     data-talle="XS-L">
+
+    <div class="imagen-producto">
+        <img src="img/optimizado/indumentaria/remeratermicamujer1.webp"
+             alt="Remera térmica Thermal Flex Base"
+             loading="lazy"
+             decoding="async">
+    </div>
+
+    <h2>Thermal Flex Base</h2>
+    <p class="detalle">Talles XS–L · Entrenamiento</p>
+
+    <div class="producto-acciones">
+        <p class="precio">$36.000</p>
+        <button>Agregar al carrito</button>
+    </div>
+</div>
+
+
+<!-- 25 · SPRINT TRAINING SHORT -->
+<div class="producto"
+     data-genero="hombre"
+     data-tipo="indumentaria"
+     data-categoria="running"
+     data-talle="S-XL">
+
+    <div class="imagen-producto">
+        <img src="img/optimizado/indumentaria/shorthombre1.webp"
+             alt="Short Sprint Training Short"
+             loading="lazy"
+             decoding="async">
+    </div>
+
+    <h2>Sprint Training Short</h2>
+    <p class="detalle">Talles S–XL · Running</p>
+
+    <div class="producto-acciones">
+        <p class="precio">$31.000</p>
+        <button>Agregar al carrito</button>
+    </div>
+</div>
+
+
+<!-- 26 · CORE SUPPORT TOP -->
+<div class="producto"
+     data-genero="mujer"
+     data-tipo="indumentaria"
+     data-categoria="entrenamiento"
+     data-talle="XS-L">
+
+    <div class="imagen-producto">
+        <img src="img/optimizado/indumentaria/topdeportivo1.webp"
+             alt="Top deportivo Core Support Top"
+             loading="lazy"
+             decoding="async">
+    </div>
+
+    <h2>Core Support Top</h2>
+    <p class="detalle">Talles XS–L · Entrenamiento</p>
+
+    <div class="producto-acciones">
+        <p class="precio">$32.000</p>
+        <button>Agregar al carrito</button>
+    </div>
+</div>
+
+<!-- 27 · HYDRA THERMAL 750 -->
+<div class="producto"
+     data-genero="unisex"
+     data-tipo="equipamiento"
+     data-categoria="entrenamiento"
+     data-talle="750ml">
+
+    <div class="imagen-producto">
+        <img src="img/optimizado/equipamiento/botellaaguatermica.webp"
+             alt="Botella térmica Hydra Thermal 750"
+             loading="lazy"
+             decoding="async">
+    </div>
+
+    <h2>Hydra Thermal 750</h2>
+    <p class="detalle">750 ml · Entrenamiento</p>
+
+    <div class="producto-acciones">
+        <p class="precio">$24.000</p>
+        <button>Agregar al carrito</button>
+    </div>
+</div>
+
+
+<!-- 28 · SHIELD PRO GUARD -->
+<div class="producto"
+     data-genero="unisex"
+     data-tipo="equipamiento"
+     data-categoria="futbol"
+     data-talle="M">
+
+    <div class="imagen-producto">
+        <img src="img/optimizado/equipamiento/canilleras.webp"
+             alt="Canilleras Shield Pro Guard"
+             loading="lazy"
+             decoding="async">
+    </div>
+
+    <h2>Shield Pro Guard</h2>
+    <p class="detalle">Talle M · Fútbol</p>
+
+    <div class="producto-acciones">
+        <p class="precio">$28.000</p>
+        <button>Agregar al carrito</button>
+    </div>
+</div>
+
+
+<!-- 29 · IMPACT PRO GLOVES -->
+<div class="producto"
+     data-genero="unisex"
+     data-tipo="equipamiento"
+     data-categoria="boxeo"
+     data-talle="12oz">
+
+    <div class="imagen-producto">
+        <img src="img/optimizado/equipamiento/guantesboxeo.webp"
+             alt="Guantes de boxeo Impact Pro Gloves"
+             loading="lazy"
+             decoding="async">
+    </div>
+
+    <h2>Impact Pro Gloves</h2>
+    <p class="detalle">12 oz · Boxeo</p>
+
+    <div class="producto-acciones">
+        <p class="precio">$46.000</p>
+        <button>Agregar al carrito</button>
+    </div>
+</div>
+
+
+<!-- 30 · FLEX RESISTANCE KIT -->
+<div class="producto"
+     data-genero="unisex"
+     data-tipo="equipamiento"
+     data-categoria="entrenamiento"
+     data-talle="kit">
+
+    <div class="imagen-producto">
+        <img src="img/optimizado/equipamiento/kitbandaselasticas.webp"
+             alt="Kit de bandas Flex Resistance Kit"
+             loading="lazy"
+             decoding="async">
+    </div>
+
+    <h2>Flex Resistance Kit</h2>
+    <p class="detalle">5 resistencias · Entrenamiento</p>
+
+    <div class="producto-acciones">
+        <p class="precio">$32.000</p>
+        <button>Agregar al carrito</button>
+    </div>
+</div>
+
+
+<!-- 31 · BALANCE TRAINING MAT -->
+<div class="producto"
+     data-genero="unisex"
+     data-tipo="equipamiento"
+     data-categoria="yoga"
+     data-talle="6mm">
+
+    <div class="imagen-producto">
+        <img src="img/optimizado/equipamiento/matdeyoga.webp"
+             alt="Mat Balance Training Mat"
+             loading="lazy"
+             decoding="async">
+    </div>
+
+    <h2>Balance Training Mat</h2>
+    <p class="detalle">6 mm · Yoga</p>
+
+    <div class="producto-acciones">
+        <p class="precio">$27.000</p>
+        <button>Agregar al carrito</button>
+    </div>
+</div>
+
+
+<!-- 32 · ACTIVE GEAR BACKPACK -->
+<div class="producto"
+     data-genero="unisex"
+     data-tipo="equipamiento"
+     data-categoria="outdoor"
+     data-talle="25L">
+
+    <div class="imagen-producto">
+        <img src="img/optimizado/equipamiento/mochila1.webp"
+             alt="Mochila Active Gear Backpack"
+             loading="lazy"
+             decoding="async">
+    </div>
+
+    <h2>Active Gear Backpack</h2>
+    <p class="detalle">25 L · Outdoor</p>
+
+    <div class="producto-acciones">
+        <p class="precio">$43.000</p>
+        <button>Agregar al carrito</button>
+    </div>
+</div>
+
+
+<!-- 33 · COURT CONTROL BALL -->
+<div class="producto"
+     data-genero="unisex"
+     data-tipo="equipamiento"
+     data-categoria="basquet"
+     data-talle="7">
+
+    <div class="imagen-producto">
+        <img src="img/optimizado/equipamiento/pelotabasquet.webp"
+             alt="Pelota de básquet Court Control Ball"
+             loading="lazy"
+             decoding="async">
+    </div>
+
+    <h2>Court Control Ball</h2>
+    <p class="detalle">Talle 7 · Básquet</p>
+
+    <div class="producto-acciones">
+        <p class="precio">$31.000</p>
+        <button>Agregar al carrito</button>
+    </div>
+</div>
+
+
+<!-- 34 · CORE POWER KETTLEBELL -->
+<div class="producto"
+     data-genero="unisex"
+     data-tipo="equipamiento"
+     data-categoria="fuerza"
+     data-talle="ajustable">
+
+    <div class="imagen-producto">
+        <img src="img/optimizado/equipamiento/pesarusaregulable.webp"
+             alt="Pesa rusa Core Power Kettlebell"
+             loading="lazy"
+             decoding="async">
+    </div>
+
+    <h2>Core Power Kettlebell</h2>
+    <p class="detalle">Ajustable · Fuerza</p>
+
+    <div class="producto-acciones">
+        <p class="precio">$74.000</p>
+        <button>Agregar al carrito</button>
+    </div>
+</div>
+
+
+<!-- 35 · PRECISION COURT PRO -->
+<div class="producto"
+     data-genero="unisex"
+     data-tipo="equipamiento"
+     data-categoria="tenis"
+     data-talle="adulto">
+
+    <div class="imagen-producto">
+        <img src="img/optimizado/equipamiento/raquetatenis.webp"
+             alt="Raqueta Precision Court Pro"
+             loading="lazy"
+             decoding="async">
+    </div>
+
+    <h2>Precision Court Pro</h2>
+    <p class="detalle">Adulto · Tenis</p>
+
+    <div class="producto-acciones">
+        <p class="precio">$58.000</p>
+        <button>Agregar al carrito</button>
+    </div>
+</div>
+
+
+<!-- 36 · RUN BELT MOTION -->
+<div class="producto"
+     data-genero="unisex"
+     data-tipo="equipamiento"
+     data-categoria="running"
+     data-talle="regulable">
+
+    <div class="imagen-producto">
+        <img src="img/optimizado/equipamiento/riñoneradeportiva.webp"
+             alt="Riñonera deportiva Run Belt Motion"
+             loading="lazy"
+             decoding="async">
+    </div>
+
+    <h2>Run Belt Motion</h2>
+    <p class="detalle">Regulable · Running</p>
+
+    <div class="producto-acciones">
+        <p class="precio">$22.000</p>
+        <button>Agregar al carrito</button>
+    </div>
+</div>
+
+</div>
 
 
     <!-- SCRIPT FIREBASE AUTH + FIRESTORE -->
@@ -491,7 +1376,7 @@ onAuthStateChanged(window.auth, function(usuario) {
 });
 </script>
 
-<script type="module" src="script.js?v=20260907"></script>
+<script type="module" src="script.js?v=20260908"></script>
 
 <div id="toast-container"></div>
 

@@ -1352,8 +1352,8 @@ body.modo-busqueda .catalogo-encabezado {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center 80%;
-    transform: scale(1.02);
+    object-position: center 60%;
+    transform: scale(1);
 }
 
 .hero-banner-overlay {
@@ -2859,5 +2859,324 @@ body.modo-busqueda .catalogo-encabezado {
 
     .resultado-pago__card h1 {
         font-size: 1.6rem;
+    }
+}
+
+/* ==========================================
+   CARRUSEL DE PRODUCTOS DESTACADOS
+========================================== */
+
+.destacados-carrusel {
+    width: 100%;
+    max-width: 1400px;
+    box-sizing: border-box;
+
+    margin: 0 auto;
+    padding: 0 20px 38px;
+}
+
+
+/* Encabezado */
+
+.destacados-encabezado {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+
+    margin-bottom: 22px;
+}
+
+.destacados-kicker {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: var(--turf-green);
+
+    font-family: 'Roboto Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+}
+
+.destacados-encabezado h2 {
+    margin: 0;
+
+    color: var(--pitch-navy);
+
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(34px, 4vw, 50px);
+    line-height: 0.95;
+    letter-spacing: 0.5px;
+}
+
+
+/* Controles */
+
+.destacados-controles {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.destacados-flecha {
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    background: transparent;
+    color: var(--pitch-navy);
+
+    border: 1px solid rgba(11, 31, 23, 0.16);
+    border-radius: 50%;
+
+    font-size: 20px;
+    line-height: 1;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.destacados-flecha:hover {
+    background: var(--pitch-navy);
+    color: var(--chalk);
+    border-color: var(--pitch-navy);
+
+    transform: translateY(-2px);
+}
+
+
+/* Fila horizontal */
+
+.destacados-track {
+    display: flex;
+    gap: 18px;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+
+    padding-bottom: 8px;
+
+    scrollbar-width: none;
+}
+
+.destacados-track::-webkit-scrollbar {
+    display: none;
+}
+
+
+/* Tarjetas dentro del carrusel */
+
+.destacados-track .producto {
+    flex: 0 0 calc((100% - 54px) / 4);
+
+    min-width: 0;
+    margin-bottom: 0;
+
+    scroll-snap-align: start;
+}
+
+
+/* ==========================================
+   TABLET
+========================================== */
+
+@media (max-width: 1024px) {
+
+    .destacados-track .producto {
+        flex-basis: calc((100% - 36px) / 3);
+    }
+}
+
+
+/* ==========================================
+   MÓVIL
+========================================== */
+
+@media (max-width: 768px) {
+
+    .destacados-carrusel {
+        padding: 0 16px 30px;
+    }
+
+    .destacados-encabezado {
+        align-items: center;
+        margin-bottom: 18px;
+    }
+
+    .destacados-encabezado h2 {
+        font-size: 36px;
+    }
+
+    .destacados-kicker {
+        font-size: 9px;
+    }
+
+    .destacados-flecha {
+        width: 38px;
+        height: 38px;
+        flex-shrink: 0;
+    }
+
+    .destacados-track {
+        gap: 14px;
+
+        margin-right: -16px;
+        padding-right: 16px;
+    }
+
+    .destacados-track .producto {
+        flex-basis: 78%;
+    }
+}
+
+
+/* Teléfonos chicos */
+
+@media (max-width: 420px) {
+
+    .destacados-encabezado h2 {
+        font-size: 31px;
+    }
+
+    .destacados-track .producto {
+        flex-basis: 84%;
+    }
+}
+
+/* ==========================================
+   CONTROLES LATERALES DESTACADOS
+========================================== */
+
+.destacados-slider {
+    display: grid;
+    grid-template-columns: 46px minmax(0, 1fr) 46px;
+    align-items: center;
+    gap: 14px;
+}
+
+.destacados-controles {
+    display: none;
+}
+
+.destacados-slider .destacados-flecha {
+    flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+
+    .destacados-slider {
+        grid-template-columns: 38px minmax(0, 1fr) 38px;
+        gap: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .destacados-slider {
+        grid-template-columns: 34px minmax(0, 1fr) 34px;
+        gap: 6px;
+    }
+
+    .destacados-slider .destacados-flecha {
+        width: 34px;
+        height: 34px;
+        font-size: 17px;
+    }
+}
+
+@media (max-width: 610px) {
+    .hero-banner img {
+        object-position: 55% center;
+        transform: scale(1);
+    }
+}
+
+@media (max-width: 610px) {
+
+    .hero-banner-overlay {
+        padding: 18px 14px 20px;
+        justify-content: flex-end;
+        align-items: flex-start;
+    }
+
+    .hero-kicker {
+        position: absolute;
+        top: 18px;
+        left: 14px;
+
+        margin: 0;
+        padding: 5px 8px;
+
+        font-size: 8px;
+        letter-spacing: 1px;
+    }
+
+    .hero-banner-overlay h2 {
+        max-width: 320px;
+
+        margin: 0 0 10px;
+
+        font-size: clamp(34px, 10.5vw, 42px);
+        line-height: 0.9;
+        letter-spacing: 0.4px;
+    }
+
+    .hero-banner-overlay p {
+        max-width: 285px;
+
+        margin: 0 0 15px;
+
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    .btn-ver-catalogo {
+        min-height: 40px;
+        padding: 0 40px 0 16px;
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 370px) {
+
+    .destacados-track .producto-acciones {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .destacados-track .producto button {
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 340px) {
+
+    .marca-header {
+        gap: 5px;
+    }
+
+    .marca-nombre {
+        font-size: 16px;
+        letter-spacing: 0.5px;
+    }
+
+    .marca-simbolo {
+        width: 21px;
     }
 }

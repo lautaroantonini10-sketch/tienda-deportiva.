@@ -222,10 +222,182 @@ if (inputBuscador) {
 
 const estadoBusqueda = document.querySelector("#estado-busqueda");
 
+// ==========================================
+// CARRUSEL DE DESTACADOS
+// ==========================================
+
+const destacadosCarrusel = document.querySelector("#destacados-carrusel");
+const destacadosTrack = document.querySelector("#destacados-track");
+const btnDestacadosAnterior = document.querySelector("#destacados-anterior");
+const btnDestacadosSiguiente = document.querySelector("#destacados-siguiente");
+
+let modoDestacados = true;
+
+const productosDestacados = Array.from(productos).filter(function(prod) {
+    return prod.dataset.destacado === "true";
+});
+
+if (destacadosTrack) {
+    productosDestacados.forEach(function(prod) {
+        const copia = prod.cloneNode(true);
+
+        const boton = copia.querySelector("button");
+
+        boton?.addEventListener("click", function() {
+            const nombre = copia.querySelector("h2").textContent;
+            const precioTexto = copia.querySelector(".precio").textContent;
+            const img = copia.querySelector("img")?.src || "";
+
+            agregarAlCarrito(nombre, precioTexto, img);
+        });
+
+        destacadosTrack.appendChild(copia);
+    });
+}
+
+function actualizarCarruselDestacados(textoBusqueda = "") {
+    if (!destacadosCarrusel) return;
+
+    const mostrarCarrusel =
+        modoDestacados &&
+        textoBusqueda === "";
+
+    destacadosCarrusel.hidden = !mostrarCarrusel;
+}
+
+// ==========================================
+// MOVIMIENTO DEL CARRUSEL DE DESTACADOS
+// ==========================================
+
+let autoplayDestacados = null;
+
+function desplazarDestacados(direccion) {
+    if (!destacadosTrack) return;
+
+    const tarjeta = destacadosTrack.querySelector(".producto");
+    if (!tarjeta) return;
+
+    const estilosTrack = getComputedStyle(destacadosTrack);
+    const gap = parseFloat(estilosTrack.gap) || 0;
+
+    const distancia =
+        tarjeta.getBoundingClientRect().width + gap;
+
+    const maxScroll =
+        destacadosTrack.scrollWidth -
+        destacadosTrack.clientWidth;
+
+    // Si llega al final, vuelve suavemente al principio
+    if (
+        direccion > 0 &&
+        destacadosTrack.scrollLeft + distancia >= maxScroll - 5
+    ) {
+        destacadosTrack.scrollTo({
+            left: 0,
+            behavior: "smooth"
+        });
+
+        return;
+    }
+
+    // Si está al principio y tocamos la flecha izquierda,
+    // va al final
+    if (
+        direccion < 0 &&
+        destacadosTrack.scrollLeft <= 5
+    ) {
+        destacadosTrack.scrollTo({
+            left: maxScroll,
+            behavior: "smooth"
+        });
+
+        return;
+    }
+
+    destacadosTrack.scrollBy({
+        left: direccion * distancia,
+        behavior: "smooth"
+    });
+}
+
+function detenerAutoplayDestacados() {
+    if (autoplayDestacados) {
+        clearInterval(autoplayDestacados);
+        autoplayDestacados = null;
+    }
+}
+
+function iniciarAutoplayDestacados() {
+    detenerAutoplayDestacados();
+
+    autoplayDestacados = setInterval(function() {
+
+        if (
+            !destacadosCarrusel ||
+            destacadosCarrusel.hidden
+        ) {
+            return;
+        }
+
+        desplazarDestacados(1);
+
+    }, 2800);
+}
+
+
+// FLECHA IZQUIERDA
+btnDestacadosAnterior?.addEventListener("click", function() {
+    desplazarDestacados(-1);
+
+    iniciarAutoplayDestacados();
+});
+
+
+// FLECHA DERECHA
+btnDestacadosSiguiente?.addEventListener("click", function() {
+    desplazarDestacados(1);
+
+    iniciarAutoplayDestacados();
+});
+
+
+// Pausar mientras el usuario mira/interactúa con la cinta
+destacadosTrack?.addEventListener("mouseenter", function() {
+    detenerAutoplayDestacados();
+});
+
+destacadosTrack?.addEventListener("mouseleave", function() {
+    iniciarAutoplayDestacados();
+});
+
+
+// Pausar al tocar/deslizar en celular
+destacadosTrack?.addEventListener(
+    "touchstart",
+    function() {
+        detenerAutoplayDestacados();
+    },
+    { passive: true }
+);
+
+destacadosTrack?.addEventListener(
+    "touchend",
+    function() {
+        iniciarAutoplayDestacados();
+    },
+    { passive: true }
+);
+
+
+// Iniciar movimiento automático
+iniciarAutoplayDestacados();
+
     function aplicarFiltros() {
     const textoBusqueda = inputBuscador
         ? inputBuscador.value.toLowerCase().trim()
         : "";
+
+        actualizarCarruselDestacados(textoBusqueda);
 
     let cantidadResultados = 0;
 
@@ -246,10 +418,19 @@ const estadoBusqueda = document.querySelector("#estado-busqueda");
         filtroTipo === "todos" ||
         prod.dataset.tipo === filtroTipo;
 
-    const mostrar =
+    const esDestacado =
+    prod.dataset.destacado === "true";
+
+let mostrar;
+
+if (modoDestacados && textoBusqueda === "") {
+    mostrar = !esDestacado;
+} else {
+    mostrar =
         coincideBusqueda &&
         coincideGenero &&
         coincideTipo;
+}
 
     if (mostrar) {
         prod.style.display = "flex";
@@ -506,6 +687,10 @@ const catLinks = document.querySelectorAll(".cat-link");
 
 catLinks.forEach(function(link) {
     link.addEventListener("click", function() {
+
+modoDestacados =
+    link.dataset.destacados === "true";
+
         catLinks.forEach(function(l) {
             l.classList.remove("activo");
         });
@@ -517,12 +702,17 @@ catLinks.forEach(function(link) {
 
         aplicarFiltros();
 
-        if (catalogo) {
-            catalogo.scrollIntoView({
-                behavior: "smooth",
-                block: "start"
-            });
-        }
+        const destinoScroll =
+    modoDestacados && destacadosCarrusel
+        ? destacadosCarrusel
+        : catalogo;
+
+if (destinoScroll) {
+    destinoScroll.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+}
     });
 });
 
@@ -531,6 +721,8 @@ const subLinks = document.querySelectorAll(".sub-link");
 subLinks.forEach(function(link) {
     link.addEventListener("click", function(e) {
         e.preventDefault();
+
+        modoDestacados = false;
 
         catLinks.forEach(function(l) {
             l.classList.remove("activo");
@@ -558,6 +750,8 @@ subLinks.forEach(function(link) {
         }
     });
 });
+
+aplicarFiltros();
 
 const botonUsuario = document.querySelector("#boton-usuario");
 const seccionAuth = document.querySelector("#seccion-auth");

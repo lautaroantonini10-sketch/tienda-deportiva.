@@ -2,14 +2,47 @@ const { MercadoPagoConfig, Preference } = require("mercadopago");
 const { getFirebaseAdmin } = require("../lib/firebaseAdmin");
 
 const catalogo = {
-  "Zapatillas Running Pro": 45000,
-  "Remeras Deportivas": 25000,
-  "Shorts de Entrenamiento": 30000,
-  "Medias Antideslizantes": 15000,
-  "Botines de Futbol": 60000,
-  "Pelota de Basquet": 20000,
-  "Guantes de Boxeo": 35000,
-  "Camiseta de Ciclismo": 30000
+  // CALZADO
+  "Velocity Aura": 48000,
+  "Apex Trainer": 52000,
+  "Terra Shift": 46000,
+  "Pulse Flow": 50000,
+  "Endurance X": 56000,
+  "Motion Core": 49000,
+  "Strike Phantom": 62000,
+  "Nova Control": 59000,
+  "Field Pro X": 64000,
+  "Court Elevate": 68000,
+  "Court Pulse": 65000,
+  "Hoop Dynamic": 70000,
+
+  // INDUMENTARIA
+  "Core Motion Hoodie": 44000,
+  "Flex Sculpt Legging": 38000,
+  "Storm Active Jacket": 58000,
+  "Urban Performance Jacket": 54000,
+  "Aero Shield Jacket": 62000,
+  "Motion Track Pant": 42000,
+  "Performance Dry Tee": 29000,
+  "Pulse Fit Tee": 29000,
+  "Thermal Pro Base": 36000,
+  "Thermal Flex Base": 36000,
+  "Sprint Training Short": 31000,
+  "Core Support Top": 32000,
+
+  // EQUIPAMIENTO
+  "Hydra Thermal 750": 24000,
+  "Shield Pro Guard": 28000,
+  "Aero Ride Helmet": 52000,
+  "Impact Pro Gloves": 46000,
+  "Flex Resistance Kit": 32000,
+  "Power Adjust Dumbbell": 69000,
+  "Balance Training Mat": 27000,
+  "Active Gear Backpack": 43000,
+  "Court Control Ball": 31000,
+  "Core Power Kettlebell": 74000,
+  "Precision Court Pro": 58000,
+  "Run Belt Motion": 22000
 };
 
 exports.handler = async (event) => {
