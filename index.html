@@ -6,14 +6,24 @@
     <title>Tienda Deportiva</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="estilos.css">
+    <link rel="stylesheet" href="estilos.css?v=20260907">
 </head>
 <body>
 
    <header class="hero">
     <div class="hero-text">
-        <h1>Tienda Deportiva</h1>
-    </div>
+    <h1 class="marca-header">
+        <span class="marca-simbolo" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+        </span>
+
+        <span class="marca-nombre">
+            TIENDA <strong>DEPORTIVA</strong>
+        </span>
+    </h1>
+</div>
 
     <button id="btn-menu-movil" aria-label="Menú">☰</button>
 
@@ -47,37 +57,40 @@
     </nav>
 
     <div class="header-derecha">
-        <button id="btn-buscar-movil" aria-label="Buscar">🔍</button>
-        <input type="text" id="input-buscador" placeholder="🔍 Buscar producto...">
+        <button id="btn-buscar-movil" aria-label="Buscar">
+          <svg class="icono-header" viewBox="0 0 24 24" aria-hidden="true">
+           <circle cx="11" cy="11" r="7"></circle>
+           <path d="M20 20L16.65 16.65"></path>
+       </svg>
+  </button>
+        <input
+             type="search"
+             id="input-buscador"
+             name="product-search"
+             placeholder="Buscar productos..."
+             autocomplete="off"
+             autocapitalize="none"
+             spellcheck="false"
+        >
 
         <div class="usuario-container">
-            <button id="boton-usuario" aria-label="Mi cuenta">👤</button>
-
-            <div id="seccion-auth">
-                <button id="btn-cerrar-auth">&times;</button>
-                <div id="form-auth-header">
-                    <div class="inputs-auth">
-                        <input type="email" id="email-input" placeholder="Correo electrónico">
-                        <input type="password" id="password-input" placeholder="Contraseña">
-                    </div>
-                    <button id="btn-auth-principal">Iniciar sesión</button>
-                    <p class="toggle-auth">¿No tenés cuenta? <a href="#" id="link-toggle-auth">Registrate</a></p>
-                    <p id="mensaje-auth"></p>
-                </div>
-
-                <div id="info-usuario-header" style="display: none;">
-                    <span>Hola, <strong id="email-usuario"></strong></span>
-                    <button id="btn-mis-compras">📋 Mis compras</button>
-                    <button id="btn-logout">Cerrar sesión</button>
-                </div>
-            </div>
+            <button id="boton-usuario" aria-label="Mi cuenta">
+             <svg class="icono-header" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="8" r="4"></circle>
+            <path d="M4 21C4 17.5 7.6 15 12 15C16.4 15 20 17.5 20 21"></path>
+      </svg>
+ </button>
         </div>
 
         <div class="carrito-container">
             <button id="boton-carrito" aria-label="Carrito">
-                🛒
-                <span id="contador-carrito">0</span>
-            </button>
+             <svg class="icono-header" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 4H5L7.2 15H17.8L20 7H6"></path>
+              <circle cx="9" cy="20" r="1"></circle>
+             <circle cx="17" cy="20" r="1"></circle>
+       </svg>
+   <span id="contador-carrito">0</span>
+</button>
 
             <div id="seccion-carrito">
                 <h2>Mi Carrito</h2>
@@ -92,13 +105,80 @@
     </div>
 </header>
 
-<section class="hero-banner">
-    <img src="img/pexels-jishnu-radhakrishnan-716503-1554099.jpg" alt="Equipamiento deportivo">
-    <div class="hero-banner-overlay">
-        <h2>PREPARATE PARA<br>TU PRÓXIMA META</h2>
-        <p>Los mejores diseños para tu entrenamiento</p>
-        <a href="#catalogo" class="btn-ver-catalogo">Ver catálogo</a>
+<div id="seccion-auth">
+
+    <button id="btn-cerrar-auth" aria-label="Cerrar">
+        &times;
+    </button>
+
+    <div id="form-auth-header">
+
+        <div class="inputs-auth">
+
+            <input
+                type="email"
+                id="email-input"
+                placeholder="Correo electrónico"
+            >
+
+            <input
+                type="password"
+                id="password-input"
+                placeholder="Contraseña"
+            >
+
+        </div>
+
+        <button id="btn-auth-principal">
+            Iniciar sesión
+        </button>
+
+        <p class="toggle-auth">
+           <span id="texto-toggle-auth">¿No tenés cuenta?</span>
+           <a href="#" id="link-toggle-auth">Registrate</a>
+     </p>
+
+        <p id="mensaje-auth"></p>
+
     </div>
+
+    <div id="info-usuario-header" style="display: none;">
+
+        <span>
+            Hola,
+            <strong id="email-usuario"></strong>
+        </span>
+
+        <button id="btn-mis-compras">
+            Mis compras
+        </button>
+
+        <button id="btn-logout">
+            Cerrar sesión
+        </button>
+
+    </div>
+
+</div>
+
+<section class="hero-banner">
+    <img
+    src="img/optimizado/pexels-jishnu-radhakrishnan-716503-1554099.jpg"
+    alt="Equipamiento deportivo"
+    fetchpriority="high"
+    decoding="async"
+    >
+    <div class="hero-banner-overlay">
+    <span class="hero-kicker">NUEVA TEMPORADA · 2026</span>
+
+    <h2>PREPARATE PARA<br>TU PRÓXIMA META</h2>
+
+    <p>Diseñado para entrenar, competir y superar tus límites.</p>
+
+    <a href="#catalogo" class="btn-ver-catalogo">
+        Explorar colección
+    </a>
+</div>
 </section>
 
 <div class="promo-ticker">
@@ -115,89 +195,174 @@
     </div>
 </div>
 
+<section class="catalogo-encabezado">
+
+    <div class="catalogo-titulo revelar-izquierda">
+        <span class="catalogo-kicker">
+            EQUIPAMIENTO DEPORTIVO / 2026
+        </span>
+
+        <h2>
+            ENCONTRÁ LO QUE<br>
+            TE LLEVA MÁS LEJOS
+        </h2>
+    </div>
+
+    <div class="catalogo-frase revelar-derecha">
+        <span>PERFORMANCE / MOVEMENT / EVERYDAY</span>
+
+        <p>
+            HECHO PARA MOVERTE.<br>
+            PENSADO PARA RENDIR.
+        </p>
+    </div>
+
+</section>
+
+<div id="estado-busqueda" aria-live="polite"></div>
+
         <!-- CATÁLOGO -->
         <div class="catalogo" id="catalogo">
             <div class="producto" data-genero="unisex" data-tipo="zapatillas" data-categoria="running" data-talle="42">
                 <div class="imagen-producto">
-            <img src="img/mostafa-mahmoudi-W_uDEmTq0po-unsplash.jpg" alt="Zapatillas running">
+            <img src="img/optimizado/mostafa-mahmoudi-W_uDEmTq0po-unsplash.jpg"
+                 alt="Zapatillas running"
+                 loading="lazy"
+                 decoding="async"
+                 >
             <span class="etiqueta-producto">DESTACADO</span>
                 </div>
                 <h2>Zapatillas Running Pro</h2>
-                <p class="precio">$45.000</p>
                 <p class="detalle">Talle 42 · Running</p>
-                <button>Agregar al carrito</button>
+            <div class="producto-acciones">
+                 <p class="precio">$45.000</p>
+                 <button>Agregar al carrito</button>
+              </div>
             </div>
 
             <div class="producto" data-genero="hombre" data-tipo="indumentaria" data-categoria="deportivas" data-talle="M">
                 <div class="imagen-producto">
-             <img src="img/tuananh-blue-Jv0EjfH3Z5Y-unsplash.jpg" alt="Remeras deportivas">
+             <img src="img/optimizado/tuananh-blue-Jv0EjfH3Z5Y-unsplash.jpg"
+                  alt="Remeras deportivas"
+                  loading="lazy"
+                  decoding="async"
+                  >
              <span class="etiqueta-producto etiqueta-nuevo">NUEVO</span>
                 </div>
                 <h2>Remeras Deportivas</h2>
-                <p class="precio">$25.000</p>
                 <p class="detalle">Talle M · Deportivas</p>
-                <button>Agregar al carrito</button>
+                <div class="producto-acciones">
+                    <p class="precio">$25.000</p>
+                    <button>Agregar al carrito</button>
+                </div>
             </div>
 
             <div class="producto" data-genero="hombre" data-tipo="indumentaria" data-categoria="entrenamiento" data-talle="L">
-                <img src="img/tuananh-blue-IRMsL4IVGWY-unsplash.jpg" alt="Shorts de entrenamiento">
+                <img src="img/optimizado/tuananh-blue-IRMsL4IVGWY-unsplash.jpg"
+                     alt="Shorts de entrenamiento"
+                     loading="lazy"
+                     decoding="async"
+                     >
                 <h2>Shorts de Entrenamiento</h2>
-                <p class="precio">$30.000</p>
                 <p class="detalle">Talle L · Entrenamiento</p>
-                <button>Agregar al carrito</button>
+                <div class="producto-acciones">
+                    <p class="precio">$30.000</p>
+                    <button>Agregar al carrito</button>
+                </div>
             </div>
 
             <div class="producto" data-genero="unisex" data-tipo="accesorios" data-categoria="running" data-talle="S">
-                <img src="img/sam-moghadam-Y0lUBKt-AZI-unsplash.jpg" alt="Medias antideslizantes">
+                <img src="img/optimizado/sam-moghadam-Y0lUBKt-AZI-unsplash.jpg"
+                     alt="Medias antideslizantes"
+                     loading="lazy"
+                     decoding="async"
+                    >
                 <h2>Medias Antideslizantes</h2>
-                <p class="precio">$15.000</p>
                 <p class="detalle">Talle S · Antideslizantes</p>
-                <button>Agregar al carrito</button>
+                <div class="producto-acciones">
+                    <p class="precio">$15.000</p>
+                    <button>Agregar al carrito</button>
+                </div>
             </div>
 
             <div class="producto" data-genero="hombre" data-tipo="zapatillas" data-categoria="futbol" data-talle="42">
                 <div class="imagen-producto">
-            <img src="img/braden-hopkins-sC-AbZG-Sec-unsplash.jpg" alt="Botines de futbol">
+            <img src="img/optimizado/braden-hopkins-sC-AbZG-Sec-unsplash.jpg"
+                 alt="Botines de futbol"
+                 loading="lazy"
+                 decoding="async"
+                 >
             <span class="etiqueta-producto etiqueta-oferta">OFERTA</span>
                 </div>
                 <h2>Botines de Futbol</h2>
-                <p class="precio">$60.000</p>
                 <p class="detalle">Talle 42 · Futbol</p>
-                <button>Agregar al carrito</button>
+                <div class="producto-acciones">
+                    <p class="precio">$60.000</p>
+                    <button>Agregar al carrito</button>
+                </div>
             </div>
 
             <div class="producto" data-genero="unisex" data-tipo="accesorios" data-categoria="basquet" data-talle="M">
-                <img src="img/bailey-burton-o5UlVmTwVz8-unsplash.jpg" alt="Pelota de Basquet">
+                <img src="img/optimizado/bailey-burton-o5UlVmTwVz8-unsplash.jpg"
+                     alt="Pelota de Basquet"
+                     loading="lazy"
+                     decoding="async"
+                     >
                 <h2>Pelota de Basquet</h2>
-                <p class="precio">$20.000</p>
                 <p class="detalle">Talle M · Basquet</p>
-                <button>Agregar al carrito</button>
+                <div class="producto-acciones">
+                    <p class="precio">$20.000</p>
+                    <button>Agregar al carrito</button>
+                </div>
             </div>
 
             <div class="producto" data-genero="unisex" data-tipo="accesorios" data-categoria="boxeo" data-talle="M">
-                <img src="img/zane-burko-yYQwAKTN_34-unsplash.jpg" alt="Guantes de boxeo">
+                <img src="img/optimizado/zane-burko-yYQwAKTN_34-unsplash.jpg"
+                 alt="Guantes de boxeo"
+                 loading="lazy"
+                 decoding="async"
+                 >
                 <h2>Guantes de Boxeo</h2>
-                <p class="precio">$35.000</p>
                 <p class="detalle">Talle M · Boxeo</p>
-                <button>Agregar al carrito</button>
+                <div class="producto-acciones">
+                    <p class="precio">$35.000</p>
+                    <button>Agregar al carrito</button>
+                </div>
             </div>
 
             <div class="producto" data-genero="mujer" data-tipo="indumentaria" data-categoria="ciclismo" data-talle="L">
-                <img src="img/munbaik-cycling-clothing-QJjOKSRLsh0-unsplash.jpg" alt="Camiseta de ciclismo">
+                <img src="img/optimizado/munbaik-cycling-clothing-QJjOKSRLsh0-unsplash.jpg"
+                     alt="Camiseta de ciclismo"
+                     loading="lazy"
+                     decoding="async"
+                     >
                 <h2>Camiseta de Ciclismo</h2>
-                <p class="precio">$30.000</p>
                 <p class="detalle">Talle L · Ciclismo</p>
-                <button>Agregar al carrito</button>
+                <div class="producto-acciones">
+                    <p class="precio">$30.000</p>
+                    <button>Agregar al carrito</button>
+                </div>
             </div>
         </div>
- 
 
-    <!-- SCRIPT FIREBASE AUTH -->
+
     <!-- SCRIPT FIREBASE AUTH + FIRESTORE -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+    import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    signOut,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+    import {
+    getFirestore,
+    collection,
+    query,
+    where,
+    getDocs
+} from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBUbslhRu_N1KK6fD0jTYaf-_lAhRTjJh0",
@@ -210,13 +375,18 @@
 
     // Inicializar Firebase
     const app = initializeApp(firebaseConfig);
-    
+
     // Inicializar y exponer Auth en window
     window.auth = getAuth(app);
 
     // Inicializar y exponer Firestore en window
     window.db = getFirestore(app);
-    window.firestoreTools = { collection, addDoc, serverTimestamp, query, where, getDocs };
+    window.firestoreTools = {
+    collection,
+    query,
+    where,
+    getDocs
+};
 
     // Referencias DOM Auth
     const emailInput = document.querySelector("#email-input");
@@ -229,32 +399,73 @@
 
 
     let modoRegistro = false;
+
     const btnAuthPrincipal = document.querySelector("#btn-auth-principal");
     const linkToggleAuth = document.querySelector("#link-toggle-auth");
+    const textoToggleAuth = document.querySelector("#texto-toggle-auth");
+
+    passwordInput?.addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        btnAuthPrincipal?.click();
+    }
+});
 
 linkToggleAuth?.addEventListener("click", function(e) {
     e.preventDefault();
     modoRegistro = !modoRegistro;
 
-    if (modoRegistro) {
-        btnAuthPrincipal.textContent = "Crear cuenta";
-        linkToggleAuth.textContent = "Ya tengo cuenta, iniciar sesión";
-    } else {
-        btnAuthPrincipal.textContent = "Iniciar sesión";
-        linkToggleAuth.textContent = "Registrate";
-    }
+   if (modoRegistro) {
+    btnAuthPrincipal.textContent = "Crear cuenta";
+    textoToggleAuth.textContent = "¿Ya tenés cuenta?";
+    linkToggleAuth.textContent = "Iniciar sesión";
+} else {
+    btnAuthPrincipal.textContent = "Iniciar sesión";
+    textoToggleAuth.textContent = "¿No tenés cuenta?";
+    linkToggleAuth.textContent = "Registrate";
+}
+
+    passwordInput.value = "";
     mensajeAuth.textContent = "";
 });
+
+function obtenerMensajeAuth(error) {
+    switch (error.code) {
+        case "auth/invalid-email":
+            return "Ingresá un correo electrónico válido.";
+
+        case "auth/missing-password":
+            return "Ingresá tu contraseña.";
+
+        case "auth/weak-password":
+            return "La contraseña debe tener al menos 6 caracteres.";
+
+        case "auth/email-already-in-use":
+            return "Ya existe una cuenta con ese correo.";
+
+        case "auth/invalid-credential":
+            return "Correo o contraseña incorrectos.";
+
+        case "auth/too-many-requests":
+            return "Demasiados intentos. Esperá unos minutos e intentá nuevamente.";
+
+        case "auth/network-request-failed":
+            return "No pudimos conectarnos. Revisá tu conexión a internet.";
+
+        default:
+            return "Ocurrió un problema. Intentá nuevamente.";
+    }
+}
 
 btnAuthPrincipal?.addEventListener("click", function() {
     if (modoRegistro) {
         createUserWithEmailAndPassword(window.auth, emailInput.value, passwordInput.value)
             .then(() => { mensajeAuth.textContent = "¡Cuenta creada con éxito!"; })
-            .catch((error) => { mensajeAuth.textContent = error.message; });
+            .catch((error) => { mensajeAuth.textContent = obtenerMensajeAuth(error); });
     } else {
         signInWithEmailAndPassword(window.auth, emailInput.value, passwordInput.value)
             .then(() => { mensajeAuth.textContent = ""; })
-            .catch((error) => { mensajeAuth.textContent = error.message; });
+            .catch((error) => { mensajeAuth.textContent = obtenerMensajeAuth(error); });
     }
 });
 const btnLogout = document.querySelector("#btn-logout");
@@ -276,17 +487,23 @@ onAuthStateChanged(window.auth, function(usuario) {
 });
 </script>
 
-<script type="module" src="script.js"></script>
+<script type="module" src="script.js?v=20260907"></script>
 
 <div id="toast-container"></div>
 
 <div id="modal-historial" class="oculto">
     <div class="modal-contenido">
+
         <div class="modal-header">
             <h2>Mis Compras</h2>
-            <button id="btn-cerrar-modal">&times;</button>
+
+            <button id="btn-cerrar-modal" aria-label="Cerrar historial de compras">
+                &times;
+            </button>
         </div>
+
         <div id="contenedor-historial"></div>
+
     </div>
 </div>
 

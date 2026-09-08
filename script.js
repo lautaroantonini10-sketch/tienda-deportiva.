@@ -89,17 +89,22 @@ function actualizarCarritoUI() {
         total += subtotal;
         cantidadTotalProductos += cantidad;
 
-        const li = document.createElement("li");
-        li.style.display = "flex";
-        li.style.justifyContent = "space-between";
-        li.style.alignItems = "center";
-        li.style.marginBottom = "8px";
+       const li = document.createElement("li");
 
-        li.innerHTML = `
-            <span><strong>${item.nombre}</strong> (x${cantidad}) - $${subtotal.toLocaleString("es-AR")}</span>
-            <button class="btn-eliminar" data-index="${index}" style="background:#d9534f; color:white; border:none; border-radius:3px; padding:2px 6px; cursor:pointer;">X</button>
-        `;
+li.innerHTML = `
+    <span>
+        <strong>${item.nombre}</strong>
+        (x${cantidad}) - $${subtotal.toLocaleString("es-AR")}
+    </span>
 
+    <button
+        class="btn-eliminar"
+        data-index="${index}"
+        aria-label="Eliminar ${item.nombre} del carrito"
+    >
+        X
+    </button>
+`;
         listaCarrito.appendChild(li);
     });
 
@@ -155,10 +160,16 @@ function eliminarDelCarrito(index) {
 if (btnVaciar) {
     btnVaciar.addEventListener("click", function () {
         carrito = [];
+
         guardarCarritoEnLocalStorage();
         actualizarCarritoUI();
-        if (mensajePago) mensajePago.textContent = "";
-         mostrarToast("🧹 Carrito vacío"); 
+
+        if (mensajePago) {
+            mensajePago.textContent = "";
+            mensajePago.classList.remove("error", "aviso");
+        }
+
+        mostrarToast("🧹 Carrito vacío");
     });
 }
 
@@ -188,25 +199,111 @@ const inputBuscador = document.querySelector("#input-buscador");
 const productos = document.querySelectorAll(".producto");
 const catalogo = document.querySelector("#catalogo");
 
-function aplicarBusqueda() {
+const indiceBusqueda = Array.from(productos).map(function(prod) {
+    const palabras = prod
+        .querySelector("h2")
+        .textContent
+        .toLowerCase()
+        .trim()
+        .split(/\s+/);
+
+    return {
+        elemento: prod,
+        palabras: palabras
+    };
+});
+
+let filtroGenero = "todos";
+let filtroTipo = "todos";
+
+if (inputBuscador) {
+    inputBuscador.value = "";
+}
+
+const estadoBusqueda = document.querySelector("#estado-busqueda");
+
+    function aplicarFiltros() {
     const textoBusqueda = inputBuscador
         ? inputBuscador.value.toLowerCase().trim()
         : "";
 
-    productos.forEach(function(prod) {
-        const nombre = prod.querySelector("h2").textContent.toLowerCase();
-        const coincideBusqueda = nombre.includes(textoBusqueda);
+    let cantidadResultados = 0;
 
-        if (coincideBusqueda) {
-            prod.style.display = "flex";
-        } else {
-            prod.style.display = "none";
+    indiceBusqueda.forEach(function(item) {
+    const prod = item.elemento;
+
+    const coincideBusqueda =
+        textoBusqueda === "" ||
+        item.palabras.some(function(palabra) {
+            return palabra.startsWith(textoBusqueda);
+        });
+
+    const coincideGenero =
+        filtroGenero === "todos" ||
+        prod.dataset.genero === filtroGenero;
+
+    const coincideTipo =
+        filtroTipo === "todos" ||
+        prod.dataset.tipo === filtroTipo;
+
+    const mostrar =
+        coincideBusqueda &&
+        coincideGenero &&
+        coincideTipo;
+
+    if (mostrar) {
+        prod.style.display = "flex";
+        cantidadResultados++;
+    } else {
+        prod.style.display = "none";
+    }
+});
+
+    if (textoBusqueda !== "") {
+        document.body.classList.add("modo-busqueda");
+
+        if (estadoBusqueda) {
+    estadoBusqueda.innerHTML = "";
+
+    const tituloEstado = document.createElement("strong");
+    const detalleEstado = document.createElement("span");
+
+    if (cantidadResultados === 0) {
+        tituloEstado.textContent = "No encontramos productos";
+        detalleEstado.textContent = "Probá con otra búsqueda.";
+    } else {
+        tituloEstado.textContent =
+            `Resultados para "${textoBusqueda}"`;
+
+        detalleEstado.textContent =
+            cantidadResultados +
+            (cantidadResultados === 1
+                ? " producto"
+                : " productos");
+    }
+
+    estadoBusqueda.appendChild(tituloEstado);
+    estadoBusqueda.appendChild(detalleEstado);
+}
+    } else {
+        document.body.classList.remove("modo-busqueda");
+
+        if (estadoBusqueda) {
+            estadoBusqueda.innerHTML = "";
         }
-    });
+    }
 }
 
+let temporizadorBusqueda;
+
 if (inputBuscador) {
-    inputBuscador.addEventListener("input", aplicarBusqueda);
+    inputBuscador.addEventListener("input", function() {
+        clearTimeout(temporizadorBusqueda);
+
+        temporizadorBusqueda = setTimeout(function() {
+            aplicarFiltros();
+        }, 80);
+    });
 }
 
 // ==========================================
@@ -216,26 +313,31 @@ if (btnPagar) {
     btnPagar.addEventListener("click", async function () {
 
         // Evitar checkout con carrito vacío
-        if (!Array.isArray(carrito) || carrito.length === 0) {
-            if (mensajePago) {
-                mensajePago.textContent = "⚠️ Tu carrito está vacío.";
-                mensajePago.style.color = "#d9534f";
-            }
-            return;
-        }
+       if (!Array.isArray(carrito) || carrito.length === 0) {
+    if (mensajePago) {
+        mensajePago.classList.remove("aviso");
+        mensajePago.classList.add("error");
+
+        mensajePago.textContent = "⚠️ Tu carrito está vacío.";
+    }
+
+    return;
+}
 
         // Por ahora mantenemos el requisito de iniciar sesión
         const usuarioLogueado = window.auth && window.auth.currentUser;
 
         if (!usuarioLogueado) {
-            if (mensajePago) {
-                mensajePago.textContent =
-                    "⚠️ Debes iniciar sesión o registrarte para continuar.";
-                mensajePago.style.color = "#e8a838";
-            }
+    if (mensajePago) {
+        mensajePago.classList.remove("error");
+        mensajePago.classList.add("aviso");
 
-            return;
-        }
+        mensajePago.textContent =
+            "⚠️ Debes iniciar sesión o registrarte para continuar.";
+    }
+
+    return;
+}
 
         // El navegador solo manda identificación del producto y cantidad.
         // El precio verdadero lo decide el backend.
@@ -250,9 +352,9 @@ if (btnPagar) {
         btnPagar.textContent = "Cargando Mercado Pago...";
 
         if (mensajePago) {
-            mensajePago.textContent = "";
-        }
-
+    mensajePago.textContent = "";
+    mensajePago.classList.remove("error", "aviso");
+}
         try {
 
             const idToken = await usuarioLogueado.getIdToken();
@@ -291,11 +393,12 @@ if (btnPagar) {
             console.error("Error al iniciar Mercado Pago:", error);
 
             if (mensajePago) {
-                mensajePago.textContent =
-                    "❌ No pudimos iniciar el pago. Intentá nuevamente.";
-                mensajePago.style.color = "#d9534f";
-            }
+    mensajePago.classList.remove("aviso");
+    mensajePago.classList.add("error");
 
+    mensajePago.textContent =
+        "❌ No pudimos iniciar el pago. Intentá nuevamente.";
+}
             btnPagar.disabled = false;
             btnPagar.textContent = "Pagar con Mercado Pago";
         }
@@ -312,77 +415,114 @@ const contenedorHistorial = document.querySelector("#contenedor-historial");
 
 if (btnMisCompras) {
     btnMisCompras.addEventListener("click", async function() {
+        document.querySelector("#seccion-auth")?.classList.remove("mostrar");
+
         modalHistorial.classList.remove("oculto");
         contenedorHistorial.innerHTML = "<p>Cargando tus compras...</p>";
 
         const usuarioLogueado = window.auth && window.auth.currentUser;
-        if (!usuarioLogueado) return;
 
-        const { collection, query, where, getDocs } = window.firestoreTools;
-        const consulta = query(
-            collection(window.db, "compras"),
-            where("usuarioUid", "==", usuarioLogueado.uid)
-        );
-        const resultado = await getDocs(consulta);
+        if (!usuarioLogueado) {
+            contenedorHistorial.innerHTML =
+                "<p>Iniciá sesión para ver tus compras.</p>";
+            return;
+        }
 
-        const comprasAprobadas = resultado.docs
-    .map(function(doc) {
-        return doc.data();
-    })
-    .filter(function(compra) {
-        return compra.estado === "approved";
+        try {
+            const { collection, query, where, getDocs } =
+                window.firestoreTools;
+
+            const consulta = query(
+                collection(window.db, "compras"),
+                where("usuarioUid", "==", usuarioLogueado.uid)
+            );
+
+            const resultado = await getDocs(consulta);
+
+            const comprasAprobadas = resultado.docs
+                .map(function(doc) {
+                    return doc.data();
+                })
+                .filter(function(compra) {
+                    return compra.estado === "approved";
+                });
+
+            if (comprasAprobadas.length === 0) {
+                contenedorHistorial.innerHTML =
+                    "<p>Todavía no tenés compras aprobadas.</p>";
+                return;
+            }
+
+            contenedorHistorial.innerHTML = "";
+
+            comprasAprobadas.forEach(function(compra) {
+                let itemsTexto = "";
+
+                compra.items.forEach(function(item) {
+                    itemsTexto +=
+                        "<li>" +
+                        item.nombre +
+                        " x" +
+                        item.cantidad +
+                        "</li>";
+                });
+
+                const divCompra = document.createElement("div");
+                divCompra.className = "compra-item";
+
+                divCompra.innerHTML =
+                    "<ul>" +
+                    itemsTexto +
+                    "</ul>" +
+                    "<p class='compra-total'>Total: $" +
+                    Number(compra.total).toLocaleString("es-AR") +
+                    "</p>";
+
+                contenedorHistorial.appendChild(divCompra);
+            });
+
+        } catch (error) {
+            console.error("Error al cargar compras:", error);
+
+            contenedorHistorial.innerHTML =
+                "<p>No pudimos cargar tus compras. Intentá nuevamente.</p>";
+        }
     });
-
-if (comprasAprobadas.length === 0) {
-    contenedorHistorial.innerHTML = "<p>Todavía no tenés compras aprobadas.</p>";
-    return;
 }
 
-contenedorHistorial.innerHTML = "";
+function cerrarHistorial() {
+    modalHistorial?.classList.add("oculto");
+}
 
-comprasAprobadas.forEach(function(compra) {
-    let itemsTexto = "";
+btnCerrarModal?.addEventListener("click", cerrarHistorial);
 
-    compra.items.forEach(function(item) {
-        itemsTexto += "<li>" + item.nombre + " x" + item.cantidad + "</li>";
-    });
-
-    const divCompra = document.createElement("div");
-    divCompra.className = "compra-item";
-
-    divCompra.innerHTML =
-        "<ul>" + itemsTexto + "</ul>" +
-        "<p class='compra-total'>Total: $" +
-        Number(compra.total).toLocaleString("es-AR") +
-        "</p>";
-
-    contenedorHistorial.appendChild(divCompra);
+modalHistorial?.addEventListener("click", function(e) {
+    if (e.target === modalHistorial) {
+        cerrarHistorial();
+    }
 });
-    });
-}
-
-if (btnCerrarModal) {
-    btnCerrarModal.addEventListener("click", function() {
-        modalHistorial.classList.add("oculto");
-    });
-}
 
 const catLinks = document.querySelectorAll(".cat-link");
 
 catLinks.forEach(function(link) {
     link.addEventListener("click", function() {
-        catLinks.forEach(function(l) { l.classList.remove("activo"); });
+        catLinks.forEach(function(l) {
+            l.classList.remove("activo");
+        });
+
         link.classList.add("activo");
 
-        const genero = link.getAttribute("data-genero");
+        filtroGenero = link.dataset.genero || "todos";
+        filtroTipo = "todos";
 
-        productos.forEach(function(prod) {
-            if (genero === "todos" || prod.getAttribute("data-genero") === genero) {
-                prod.style.display = "flex";
-            } else {
-                prod.style.display = "none";
-            }
-        });
+        aplicarFiltros();
+
+        if (catalogo) {
+            catalogo.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        }
     });
 });
 
@@ -399,21 +539,10 @@ subLinks.forEach(function(link) {
         const genero = link.getAttribute("data-genero");
         const tipo = link.getAttribute("data-tipo");
 
-        productos.forEach(function(prod) {
-            const coincideGenero =
-                genero === "todos" ||
-                prod.getAttribute("data-genero") === genero;
+        filtroGenero = genero || "todos";
+        filtroTipo = tipo || "todos";
 
-            const coincideTipo =
-                tipo === "todos" ||
-                prod.getAttribute("data-tipo") === tipo;
-
-            if (coincideGenero && coincideTipo) {
-                prod.style.display = "flex";
-            } else {
-                prod.style.display = "none";
-            }
-        });
+        aplicarFiltros();
 
         navCategorias.classList.remove("mostrar-movil");
 
@@ -434,30 +563,58 @@ const botonUsuario = document.querySelector("#boton-usuario");
 const seccionAuth = document.querySelector("#seccion-auth");
 const btnCerrarAuth = document.querySelector("#btn-cerrar-auth");
 
-btnCerrarAuth?.addEventListener("click", function() {
-    seccionAuth.classList.remove("mostrar");
-});
+function cerrarAuth() {
+    seccionAuth?.classList.remove("mostrar");
+
+    const passwordInputAuth = document.querySelector("#password-input");
+    const mensajeAuth = document.querySelector("#mensaje-auth");
+
+    if (passwordInputAuth) {
+        passwordInputAuth.value = "";
+    }
+
+    if (mensajeAuth) {
+        mensajeAuth.textContent = "";
+    }
+}
+
+btnCerrarAuth?.addEventListener("click", cerrarAuth);
 
 seccionAuth?.addEventListener("click", function(e) {
     if (e.target === seccionAuth) {
-        seccionAuth.classList.remove("mostrar");
+        cerrarAuth();
     }
 });
 
+document.addEventListener("keydown", function(e) {
+    if (e.key !== "Escape") return;
+
+    if (seccionAuth?.classList.contains("mostrar")) {
+        cerrarAuth();
+    }
+
+    if (modalHistorial && !modalHistorial.classList.contains("oculto")) {
+        cerrarHistorial();
+    }
+});
 
 botonUsuario?.addEventListener("click", function() {
     seccionAuth.classList.toggle("mostrar");
 });
 
 const header = document.querySelector(".hero");
+let scrollPendiente = false;
 
 window.addEventListener("scroll", function() {
-    if (window.scrollY > 40) {
-        header.classList.add("scrolled");
-    } else {
-        header.classList.remove("scrolled");
-    }
-});
+    if (scrollPendiente) return;
+
+    scrollPendiente = true;
+
+    requestAnimationFrame(function() {
+        header.classList.toggle("scrolled", window.scrollY > 40);
+        scrollPendiente = false;
+    });
+}, { passive: true });
 
 const btnMenuMovil = document.querySelector("#btn-menu-movil");
 const navCategorias = document.querySelector("#nav-categorias");
@@ -530,4 +687,23 @@ document.querySelectorAll(".cat-item").forEach(function(item) {
             item.classList.add("abierto");
         }
     });
+});
+
+const elementosRevelar = document.querySelectorAll(
+    ".revelar-izquierda, .revelar-derecha"
+);
+
+const observadorRevelar = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+        entry.target.classList.toggle(
+            "visible",
+            entry.isIntersecting
+        );
+    });
+}, {
+    threshold: 0.25
+});
+
+elementosRevelar.forEach(function(elemento) {
+    observadorRevelar.observe(elemento);
 });
