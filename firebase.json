@@ -12,7 +12,9 @@
       "package-lock.json",
       "netlify/**",
       "functions/**",
+      "tienda-deportiva-api/**",
       "**/.*",
+      "**/.*/**",
       "**/node_modules/**"
     ]
   }
