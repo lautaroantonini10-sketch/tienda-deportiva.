@@ -540,7 +540,7 @@ if (btnPagar) {
 
             const idToken = await usuarioLogueado.getIdToken();
             const response = await fetch(
-                "https://calm-tanuki-3fe837.netlify.app/.netlify/functions/createPreference",
+                "https://tienda-deportiva-api.lautaroantonini10.workers.dev/createPreference",
                 {
                     method: "POST",
                     headers: {

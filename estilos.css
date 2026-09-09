@@ -3180,3 +3180,23 @@ body.modo-busqueda .catalogo-encabezado {
         width: 21px;
     }
 }
+
+@media (max-width: 768px) {
+    .destacados-slider {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0;
+    }
+
+    .destacados-slider .destacados-flecha {
+        display: none;
+    }
+}@media (max-width: 768px) {
+    .destacados-slider {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0;
+    }
+
+    .destacados-slider .destacados-flecha {
+        display: none;
+    }
+}
