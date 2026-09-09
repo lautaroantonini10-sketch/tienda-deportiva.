@@ -810,7 +810,6 @@ body.modo-busqueda .catalogo-encabezado {
     box-shadow: none;
 }
 
-.producto > img,
 .imagen-producto {
     width: 100%;
     aspect-ratio: 4 / 3;
@@ -827,7 +826,6 @@ body.modo-busqueda .catalogo-encabezado {
         0 4px 14px rgba(11, 31, 23, 0.05);
 }
 
-.producto > img,
 .imagen-producto img {
     width: 100%;
     height: 100%;
@@ -1162,23 +1160,12 @@ body.modo-busqueda .catalogo-encabezado {
     z-index: 5;
 }
 
-.producto:hover > img,
 .producto:hover .imagen-producto img {
     transform: scale(1.025);
     filter: brightness(1.02);
 }
 
-.etiqueta-oferta {
-    background-color: var(--track-red);
-    color: white;
-    border-color: rgba(255, 255, 255, 0.18);
-}
 
-.etiqueta-nuevo {
-    background-color: var(--turf-green);
-    color: white;
-     border-color: rgba(255, 255, 255, 0.18);
-}
 
 
 #btn-auth-principal {
@@ -1966,9 +1953,6 @@ body.modo-busqueda .catalogo-encabezado {
     text-transform: uppercase;
 }
 
-#seccion-carrito > p {
-    color: rgba(11, 31, 23, 0.65);
-}
 
 #total-carrito {
     color: var(--pitch-navy);
@@ -1977,14 +1961,6 @@ body.modo-busqueda .catalogo-encabezado {
     font-weight: 700;
 }
 
-#mensaje-vacio {
-    padding: 18px 0;
-
-    color: rgba(11, 31, 23, 0.48);
-
-    text-align: center;
-    font-size: 13px;
-}
 
     #lista-carrito {
     max-height: 220px;
@@ -2015,21 +1991,6 @@ body.modo-busqueda .catalogo-encabezado {
     line-height: 1.4;
 }
 
-#lista-carrito .btn-eliminar {
-    width: 30px;
-    height: 30px;
-
-    flex-shrink: 0;
-    padding: 0;
-
-    background: rgba(228, 87, 46, 0.08);
-    color: var(--track-red);
-
-    border: 1px solid rgba(228, 87, 46, 0.16);
-    border-radius: 50%;
-
-    font-size: 11px;
-}
 
     #vaciar-carrito {
     width: 100%;
@@ -2247,29 +2208,7 @@ body.modo-busqueda .catalogo-encabezado {
     transform: none;
 }
 
-#btn-logout {
-    width: 100%;
 
-    margin-top: 10px;
-    padding: 11px 14px;
-
-    background: transparent;
-    color: rgba(11, 31, 23, 0.58);
-
-    border: 1px solid rgba(11, 31, 23, 0.12);
-    border-radius: 8px;
-
-    font-family: 'Inter', sans-serif;
-    font-size: 11px;
-    font-weight: 600;
-
-    cursor: pointer;
-}
-
-#btn-logout:hover {
-    background: rgba(228, 87, 46, 0.06);
-    color: var(--track-red);
-}
 
 /* =========================
    MIS COMPRAS MOBILE
@@ -2534,7 +2473,6 @@ body.modo-busqueda .catalogo-encabezado {
     box-shadow: none;
 }
 
-    .producto > img,
     .imagen-producto {
         width: 100%;
         aspect-ratio: 1 / 1;
@@ -2543,7 +2481,6 @@ body.modo-busqueda .catalogo-encabezado {
         overflow: hidden;
     }
 
-    .producto > img,
     .imagen-producto img {
         width: 100%;
         height: 100%;
@@ -2739,10 +2676,6 @@ body.modo-busqueda .catalogo-encabezado {
         padding-right: 10px;
     }
 
-    .hero-banner img {
-    object-position: 82% center;
-    transform: scale(1);
-}
 }
 
 @media (min-width: 481px) and (max-width: 610px) {
@@ -2753,10 +2686,6 @@ body.modo-busqueda .catalogo-encabezado {
         max-height: 430px;
     }
 
-    .hero-banner img {
-        object-position: 82% center;
-        transform: scale(1);
-    }
 }
 
 /* Dispositivos sin hover real */
@@ -2914,11 +2843,6 @@ body.modo-busqueda .catalogo-encabezado {
 
 /* Controles */
 
-.destacados-controles {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
 
 .destacados-flecha {
     width: 42px;
@@ -3069,28 +2993,14 @@ body.modo-busqueda .catalogo-encabezado {
     gap: 14px;
 }
 
-.destacados-controles {
-    display: none;
-}
 
 .destacados-slider .destacados-flecha {
     flex-shrink: 0;
 }
 
-@media (max-width: 768px) {
-
-    .destacados-slider {
-        grid-template-columns: 38px minmax(0, 1fr) 38px;
-        gap: 8px;
-    }
-}
 
 @media (max-width: 480px) {
 
-    .destacados-slider {
-        grid-template-columns: 34px minmax(0, 1fr) 34px;
-        gap: 6px;
-    }
 
     .destacados-slider .destacados-flecha {
         width: 34px;
@@ -3182,15 +3092,6 @@ body.modo-busqueda .catalogo-encabezado {
 }
 
 @media (max-width: 768px) {
-    .destacados-slider {
-        grid-template-columns: minmax(0, 1fr);
-        gap: 0;
-    }
-
-    .destacados-slider .destacados-flecha {
-        display: none;
-    }
-}@media (max-width: 768px) {
     .destacados-slider {
         grid-template-columns: minmax(0, 1fr);
         gap: 0;
