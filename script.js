@@ -23,6 +23,7 @@ function mostrarToast(mensaje, tipo) {
 // ==========================================
 // 1. ESTADO Y CARGA INICIAL DEL CARRITO
 // ==========================================
+const MAX_CANTIDAD_PRODUCTO = 10;
 let carrito = [];
 
 try {
@@ -125,7 +126,19 @@ function agregarAlCarrito(nombre, precio) {
     const itemExistente = carrito.find((prod) => prod.nombre === nombre);
 
     if (itemExistente) {
-        itemExistente.cantidad = (itemExistente.cantidad || 1) + 1;
+        const cantidadActual = Number(itemExistente.cantidad);
+
+        if (!Number.isInteger(cantidadActual) || cantidadActual < 1) {
+            mostrarToast("Revisá la cantidad de «" + nombre + "»: debe ser un entero entre 1 y 10.");
+            return;
+        }
+
+        if (cantidadActual >= MAX_CANTIDAD_PRODUCTO) {
+            mostrarToast("Máximo 10 unidades por producto");
+            return;
+        }
+
+        itemExistente.cantidad = cantidadActual + 1;
     } else {
         carrito.push({
             nombre: nombre,
@@ -534,6 +547,22 @@ if (btnPagar) {
                 cantidad: producto.cantidad || 1
             };
         });
+
+        for (const producto of carritoParaEnviar) {
+            const cantidad = Number(producto.cantidad);
+            const cantidadInvalida = !Number.isInteger(cantidad) || cantidad < 1;
+
+            if (cantidadInvalida || cantidad > MAX_CANTIDAD_PRODUCTO) {
+                if (mensajePago) {
+                    mensajePago.classList.remove("aviso");
+                    mensajePago.classList.add("error");
+                    mensajePago.textContent = cantidadInvalida
+                        ? "Revisá la cantidad de «" + producto.nombre + "»: debe ser un entero entre 1 y 10."
+                        : "Máximo 10 unidades por producto. Reducí la cantidad de «" + producto.nombre + "» para continuar.";
+                }
+                return;
+            }
+        }
 
         btnPagar.disabled = true;
         btnPagar.textContent = "Cargando Mercado Pago...";
