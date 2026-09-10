@@ -1,12 +1,10 @@
 # Dependencias
 node_modules/
-functions/node_modules/
 
 # Variables de entorno y secretos
 .env
 .env.*
 !.env.example
-functions/.env
 
 # Archivos locales de Netlify
 .netlify/
