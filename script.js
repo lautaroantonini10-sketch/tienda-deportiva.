@@ -67,7 +67,13 @@ function parsePrecio(precio) {
 }
 
 function guardarCarritoEnLocalStorage() {
-    localStorage.setItem("carrito", JSON.stringify(carrito));
+    try {
+        localStorage.setItem("carrito", JSON.stringify(carrito));
+        return true;
+    } catch {
+        mostrarToast("No pudimos guardar el carrito en este navegador. Podés seguir usándolo en esta página, pero si recargás o salís, los cambios pueden perderse.");
+        return false;
+    }
 }
 
 // ==========================================
