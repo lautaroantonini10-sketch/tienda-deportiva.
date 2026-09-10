@@ -25,11 +25,32 @@ function mostrarToast(mensaje, tipo) {
 // ==========================================
 const MAX_CANTIDAD_PRODUCTO = 10;
 let carrito = [];
+let huboItemsCarritoInvalidos = false;
+
+function esItemCarritoValido(item) {
+    if (item === null || typeof item !== "object" || Array.isArray(item)) {
+        return false;
+    }
+
+    if (typeof item.nombre !== "string" || item.nombre.trim() === "") {
+        return false;
+    }
+
+    const precioValido =
+        (typeof item.precio === "number" && Number.isFinite(item.precio) && item.precio >= 0) ||
+        (typeof item.precio === "string" && /^\$?\s*(?:\d+|\d{1,3}(?:\.\d{3})+)$/.test(item.precio.trim()));
+
+    return precioValido &&
+        typeof item.cantidad === "number" &&
+        Number.isInteger(item.cantidad) &&
+        item.cantidad > 0;
+}
 
 try {
     const carritoGuardado = JSON.parse(localStorage.getItem("carrito"));
     if (Array.isArray(carritoGuardado)) {
-        carrito = carritoGuardado;
+        carrito = carritoGuardado.filter(esItemCarritoValido);
+        huboItemsCarritoInvalidos = carrito.length < carritoGuardado.length;
     }
 } catch {
     carrito = [];
@@ -629,6 +650,10 @@ if (btnPagar) {
 
 // Inicializar la interfaz con los productos guardados en LocalStorage al cargar la página
 actualizarCarritoUI();
+
+if (huboItemsCarritoInvalidos) {
+    mostrarToast("Algunos productos guardados tenían datos inválidos y no se cargaron.");
+}
 
 const btnMisCompras = document.querySelector("#btn-mis-compras");
 const modalHistorial = document.querySelector("#modal-historial");
