@@ -92,20 +92,26 @@ function actualizarCarritoUI() {
 
        const li = document.createElement("li");
 
-li.innerHTML = `
-    <span>
-        <strong>${item.nombre}</strong>
-        (x${cantidad}) - $${subtotal.toLocaleString("es-AR")}
-    </span>
+        const span = document.createElement("span");
+        const strong = document.createElement("strong");
+        strong.textContent = item.nombre;
+        span.appendChild(document.createTextNode("\n        "));
+        span.appendChild(strong);
+        span.appendChild(document.createTextNode(
+            `\n        (x${cantidad}) - $${subtotal.toLocaleString("es-AR")}\n    `
+        ));
 
-    <button
-        class="btn-eliminar"
-        data-index="${index}"
-        aria-label="Eliminar ${item.nombre} del carrito"
-    >
-        X
-    </button>
-`;
+        const botonEliminar = document.createElement("button");
+        botonEliminar.className = "btn-eliminar";
+        botonEliminar.setAttribute("data-index", index);
+        botonEliminar.setAttribute("aria-label", `Eliminar ${item.nombre} del carrito`);
+        botonEliminar.textContent = "\n        X\n    ";
+
+        li.appendChild(document.createTextNode("\n    "));
+        li.appendChild(span);
+        li.appendChild(document.createTextNode("\n\n    "));
+        li.appendChild(botonEliminar);
+        li.appendChild(document.createTextNode("\n"));
         listaCarrito.appendChild(li);
     });
 
