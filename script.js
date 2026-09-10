@@ -309,7 +309,7 @@ function desplazarDestacados(direccion) {
     // Si llega al final, vuelve suavemente al principio
     if (
         direccion > 0 &&
-        destacadosTrack.scrollLeft + distancia >= maxScroll - 5
+        destacadosTrack.scrollLeft >= maxScroll - 5
     ) {
         destacadosTrack.scrollTo({
             left: 0,
