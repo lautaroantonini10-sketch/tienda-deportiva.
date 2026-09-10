@@ -184,13 +184,19 @@ if (botonCarrito && seccionCarrito) {
     });
 }
 
+function obtenerDatosProducto(producto) {
+    return {
+        nombre: producto.querySelector("h2").textContent,
+        precioTexto: producto.querySelector(".precio").textContent,
+        img: producto.querySelector(".imagen-producto img")?.src || ""
+    };
+}
+
 // Escuchar clics en botones "Agregar al carrito" de los productos
 document.querySelectorAll(".producto button").forEach((boton) => {
     boton.addEventListener("click", function () {
         const contenedorProducto = this.closest(".producto");
-        const nombre = contenedorProducto.querySelector("h2").textContent;
-        const precioTexto = contenedorProducto.querySelector(".precio").textContent;
-        const img = contenedorProducto.querySelector("img")?.src || "";
+        const { nombre, precioTexto, img } = obtenerDatosProducto(contenedorProducto);
 
         agregarAlCarrito(nombre, precioTexto, img);
     });
@@ -248,9 +254,7 @@ if (destacadosTrack) {
         const boton = copia.querySelector("button");
 
         boton?.addEventListener("click", function() {
-            const nombre = copia.querySelector("h2").textContent;
-            const precioTexto = copia.querySelector(".precio").textContent;
-            const img = copia.querySelector("img")?.src || "";
+            const { nombre, precioTexto, img } = obtenerDatosProducto(copia);
 
             agregarAlCarrito(nombre, precioTexto, img);
         });
