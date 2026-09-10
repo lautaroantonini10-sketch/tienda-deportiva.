@@ -30,7 +30,7 @@ try {
     if (Array.isArray(carritoGuardado)) {
         carrito = carritoGuardado;
     }
-} catch (e) {
+} catch {
     carrito = [];
 }
 
@@ -156,6 +156,13 @@ function eliminarDelCarrito(index) {
 
 }
 
+function limpiarMensajePago() {
+    if (mensajePago) {
+        mensajePago.textContent = "";
+        mensajePago.classList.remove("error", "aviso");
+    }
+}
+
 // Evento Vaciar Carrito
 if (btnVaciar) {
     btnVaciar.addEventListener("click", function () {
@@ -164,10 +171,7 @@ if (btnVaciar) {
         guardarCarritoEnLocalStorage();
         actualizarCarritoUI();
 
-        if (mensajePago) {
-            mensajePago.textContent = "";
-            mensajePago.classList.remove("error", "aviso");
-        }
+        limpiarMensajePago();
 
         mostrarToast("🧹 Carrito vacío");
     });
@@ -532,10 +536,7 @@ if (btnPagar) {
         btnPagar.disabled = true;
         btnPagar.textContent = "Cargando Mercado Pago...";
 
-        if (mensajePago) {
-    mensajePago.textContent = "";
-    mensajePago.classList.remove("error", "aviso");
-}
+        limpiarMensajePago();
         try {
 
             const idToken = await usuarioLogueado.getIdToken();
@@ -716,6 +717,12 @@ if (destinoScroll) {
     });
 });
 
+function cerrarSubmenus() {
+    document.querySelectorAll(".cat-item").forEach(function(item) {
+        item.classList.remove("abierto");
+    });
+}
+
 const subLinks = document.querySelectorAll(".sub-link");
 
 subLinks.forEach(function(link) {
@@ -738,9 +745,7 @@ subLinks.forEach(function(link) {
 
         navCategorias.classList.remove("mostrar-movil");
 
-        document.querySelectorAll(".cat-item").forEach(function(item) {
-            item.classList.remove("abierto");
-        });
+        cerrarSubmenus();
 
         if (catalogo) {
             catalogo.scrollIntoView({
@@ -864,9 +869,7 @@ document.addEventListener("click", function(e) {
     ) {
         navCategorias.classList.remove("mostrar-movil");
 
-        document.querySelectorAll(".cat-item").forEach(function(item) {
-            item.classList.remove("abierto");
-        });
+        cerrarSubmenus();
     }
 });
 
@@ -874,9 +877,7 @@ document.querySelectorAll(".cat-item").forEach(function(item) {
     const link = item.querySelector(".cat-link");
     link?.addEventListener("click", function() {
         const yaEstabaAbierto = item.classList.contains("abierto");
-        document.querySelectorAll(".cat-item").forEach(function(i) {
-            i.classList.remove("abierto");
-        });
+        cerrarSubmenus();
         if (!yaEstabaAbierto) {
             item.classList.add("abierto");
         }
