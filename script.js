@@ -415,6 +415,7 @@ iniciarAutoplayDestacados();
     const textoBusqueda = inputBuscador
         ? inputBuscador.value.toLowerCase().trim()
         : "";
+    const terminosBusqueda = textoBusqueda.split(/\s+/);
 
         actualizarCarruselDestacados(textoBusqueda);
 
@@ -425,8 +426,10 @@ iniciarAutoplayDestacados();
 
     const coincideBusqueda =
         textoBusqueda === "" ||
-        item.palabras.some(function(palabra) {
-            return palabra.startsWith(textoBusqueda);
+        terminosBusqueda.every(function(termino) {
+            return item.palabras.some(function(palabra) {
+                return palabra.startsWith(termino);
+            });
         });
 
     const coincideGenero =
