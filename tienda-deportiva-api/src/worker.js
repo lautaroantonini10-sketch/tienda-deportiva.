@@ -50,12 +50,79 @@ const CORS = {
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS"
 };
 
+const TIMEOUT_GOOGLE_OAUTH_MS = 4000;
+const TIMEOUT_IDENTITY_TOOLKIT_MS = 5000;
+const TIMEOUT_FIRESTORE_MS = 3000;
+const TIMEOUT_MP_PAYMENT_MS = 6000;
+const TIMEOUT_MP_PREFERENCIA_MS = 10000;
+
 let googleTokenCache = null;
 
 
 // ======================================================
 // RESPUESTAS
 // ======================================================
+
+async function fetchConTimeout(url, opciones, timeoutMs, contexto) {
+  const controller = new AbortController();
+  const signalExterno = opciones?.signal;
+  let timeoutInterno = false;
+  let timer;
+  const propagarAbort = () => controller.abort(signalExterno.reason);
+
+  try {
+    if (signalExterno) {
+      if (signalExterno.aborted) {
+        propagarAbort();
+      } else {
+        signalExterno.addEventListener("abort", propagarAbort, { once: true });
+      }
+    }
+
+    timer = setTimeout(() => {
+      if (!controller.signal.aborted) {
+        timeoutInterno = true;
+        controller.abort();
+      }
+    }, timeoutMs);
+
+    const respuesta = await fetch(url, {
+      ...opciones,
+      signal: controller.signal
+    });
+    const cuerpo = await respuesta.arrayBuffer();
+    controller.signal.throwIfAborted();
+
+    return new Response(
+      cuerpo.byteLength === 0 || [204, 205, 304].includes(respuesta.status)
+        ? null
+        : cuerpo,
+      {
+        status: respuesta.status,
+        statusText: respuesta.statusText,
+        headers: respuesta.headers
+      }
+    );
+  } catch (error) {
+    if (timeoutInterno) {
+      console.error({
+        servicio: contexto.servicio,
+        operacion: contexto.operacion,
+        motivo: "timeout"
+      });
+      const errorTimeout = new Error("Tiempo de espera externo agotado");
+      errorTimeout.name = "TimeoutError";
+      throw errorTimeout;
+    }
+    throw error;
+  } finally {
+    clearTimeout(timer);
+    if (signalExterno) {
+      signalExterno.removeEventListener("abort", propagarAbort);
+    }
+  }
+}
+
 
 function responderJson(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -189,7 +256,7 @@ async function obtenerGoogleAccessToken(env) {
       new Uint8Array(firma)
     );
 
-  const respuesta = await fetch(
+  const respuesta = await fetchConTimeout(
     "https://oauth2.googleapis.com/token",
     {
       method: "POST",
@@ -202,7 +269,9 @@ async function obtenerGoogleAccessToken(env) {
           "urn:ietf:params:oauth:grant-type:jwt-bearer",
         assertion: jwt
       })
-    }
+    },
+    TIMEOUT_GOOGLE_OAUTH_MS,
+    { servicio: "Google OAuth", operacion: "obtener_token" }
   );
 
   const data = await respuesta.json();
@@ -230,7 +299,7 @@ async function obtenerGoogleAccessToken(env) {
 // ======================================================
 
 async function validarUsuarioFirebase(idToken) {
-  const respuesta = await fetch(
+  const respuesta = await fetchConTimeout(
     "https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=" +
       FIREBASE_API_KEY,
     {
@@ -241,7 +310,9 @@ async function validarUsuarioFirebase(idToken) {
       body: JSON.stringify({
         idToken
       })
-    }
+    },
+    TIMEOUT_IDENTITY_TOOLKIT_MS,
+    { servicio: "Identity Toolkit", operacion: "validar_usuario" }
   );
 
   if (!respuesta.ok) {
@@ -345,7 +416,7 @@ async function guardarOrdenFirestore(
     }
   };
 
-  const respuesta = await fetch(url, {
+  const respuesta = await fetchConTimeout(url, {
     method: "POST",
     headers: {
       Authorization:
@@ -356,7 +427,7 @@ async function guardarOrdenFirestore(
     },
 
     body: JSON.stringify(documento)
-  });
+  }, TIMEOUT_FIRESTORE_MS, { servicio: "Firestore", operacion: "crear_orden" });
 
   if (!respuesta.ok) {
     const detalle =
@@ -391,12 +462,12 @@ async function obtenerOrdenFirestore(
     "/databases/(default)/documents/compras/" +
     encodeURIComponent(ordenId);
 
-  const respuesta = await fetch(url, {
+  const respuesta = await fetchConTimeout(url, {
     headers: {
       Authorization:
         "Bearer " + google.token
     }
-  });
+  }, TIMEOUT_FIRESTORE_MS, { servicio: "Firestore", operacion: "leer_orden" });
 
   if (respuesta.status === 404) {
     return null;
@@ -471,7 +542,7 @@ async function aprobarOrdenFirestore(
     }
   };
 
-  const respuesta = await fetch(url, {
+  const respuesta = await fetchConTimeout(url, {
     method: "PATCH",
 
     headers: {
@@ -483,7 +554,7 @@ async function aprobarOrdenFirestore(
     },
 
     body: JSON.stringify(documento)
-  });
+  }, TIMEOUT_FIRESTORE_MS, { servicio: "Firestore", operacion: "aprobar_orden" });
 
   if (!respuesta.ok) {
     const detalle =
@@ -556,14 +627,14 @@ async function actualizarReversoFirestore(env, ordenId, updateTime, campos) {
     encodeURIComponent(ordenId) + "?" +
     nombres.map(nombre => "updateMask.fieldPaths=" + encodeURIComponent(nombre)).join("&") +
     "&currentDocument.updateTime=" + encodeURIComponent(updateTime);
-  const respuesta = await fetch(url, {
+  const respuesta = await fetchConTimeout(url, {
     method: "PATCH",
     headers: {
       Authorization: "Bearer " + google.token,
       "Content-Type": "application/json"
     },
     body: JSON.stringify({ fields: campos })
-  });
+  }, TIMEOUT_FIRESTORE_MS, { servicio: "Firestore", operacion: "actualizar_reverso" });
   if (respuesta.ok) return "updated";
   let errorFirestore;
   try {
@@ -837,7 +908,7 @@ async function crearPreferencia(
     crypto.randomUUID();
 
   const respuestaMP =
-    await fetch(
+    await fetchConTimeout(
       "https://api.mercadopago.com/checkout/preferences",
       {
         method: "POST",
@@ -871,7 +942,9 @@ async function crearPreferencia(
           auto_return:
             "approved"
         })
-      }
+      },
+      TIMEOUT_MP_PREFERENCIA_MS,
+      { servicio: "Mercado Pago", operacion: "crear_preferencia" }
     );
 
   const resultadoMP =
@@ -1128,7 +1201,7 @@ async function procesarWebhook(
   }
 
   const respuestaPago =
-    await fetch(
+    await fetchConTimeout(
       "https://api.mercadopago.com/v1/payments/" +
       encodeURIComponent(dataId),
       {
@@ -1137,7 +1210,9 @@ async function procesarWebhook(
             "Bearer " +
             env.MP_ACCESS_TOKEN
         }
-      }
+      },
+      TIMEOUT_MP_PAYMENT_MS,
+      { servicio: "Mercado Pago", operacion: "consultar_payment" }
     );
 
   if (!respuestaPago.ok) {
