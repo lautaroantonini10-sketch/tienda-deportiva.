@@ -316,7 +316,26 @@ async function validarUsuarioFirebase(idToken) {
   );
 
   if (!respuesta.ok) {
-    return null;
+    if (respuesta.status === 400 || respuesta.status === 401) {
+      let errorFirebase;
+      try {
+        errorFirebase = await respuesta.json();
+      } catch {
+        errorFirebase = null;
+      }
+
+      const codigo = errorFirebase?.error?.message;
+      if (
+        codigo === "INVALID_ID_TOKEN" ||
+        codigo === "TOKEN_EXPIRED" ||
+        codigo === "USER_NOT_FOUND" ||
+        codigo === "USER_DISABLED"
+      ) {
+        return null;
+      }
+    }
+
+    throw new Error("No se pudo verificar la sesión con Identity Toolkit");
   }
 
   const data = await respuesta.json();
