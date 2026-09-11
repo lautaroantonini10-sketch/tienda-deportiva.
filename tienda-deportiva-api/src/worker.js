@@ -697,11 +697,10 @@ function evaluarReverso(orden, payment, esRelectura = false) {
   const paymentId = String(payment.id);
   function ignorar(motivo) {
     console.warn("Reverso ignorado:", {
+      servicio: "Mercado Pago",
+      motivo,
       externalReference,
-      paymentId,
-      estado: payment.status,
-      detalle: payment.status_detail,
-      motivo
+      paymentId
     });
     return { respuesta: responderJson({ received: true, ignored: motivo }) };
   }
@@ -1322,7 +1321,12 @@ async function procesarWebhook(
   if (!orden) {
     console.warn(
       "No existe una orden para external_reference:",
-      externalReference
+      {
+        servicio: "Mercado Pago",
+        motivo: "order_not_found",
+        externalReference,
+        paymentId: String(payment.id)
+      }
     );
 
     return responderJson({
@@ -1352,9 +1356,12 @@ async function procesarWebhook(
     console.error(
       "El monto del pago no coincide con la orden:",
       {
-        montoPago,
-        montoOrden,
-        externalReference
+        servicio: "Mercado Pago",
+        motivo: "amount_mismatch",
+        externalReference,
+        paymentId: String(payment.id),
+        montoEsperado: montoOrden,
+        montoRecibido: montoPago
       }
     );
 
@@ -1368,8 +1375,10 @@ async function procesarWebhook(
     console.error(
       "La moneda del pago no coincide con la orden:",
       {
-        monedaPago: payment.currency_id,
-        externalReference
+        servicio: "Mercado Pago",
+        motivo: "currency_mismatch",
+        externalReference,
+        paymentId: String(payment.id)
       }
     );
 
@@ -1452,9 +1461,10 @@ async function procesarWebhook(
 
       if (typeof paymentIdAlmacenado === "string" && paymentIdAlmacenado !== "" && paymentIdAlmacenado !== paymentId) {
         console.warn("Conflicto de payment ID:", {
+          servicio: "Mercado Pago",
+          motivo: "payment_id_conflict",
           externalReference,
-          paymentIdAlmacenado,
-          paymentIdRecibido: paymentId
+          paymentId
         });
         return responderJson({
           received: true,
@@ -1509,9 +1519,12 @@ async function procesarWebhook(
       );
       if (!Number.isFinite(montoOrdenReleida) || montoOrdenReleida !== montoPago) {
         console.error("El monto del pago no coincide con la orden releída:", {
-          montoPago,
-          montoOrden: montoOrdenReleida,
-          externalReference
+          servicio: "Mercado Pago",
+          motivo: "amount_mismatch",
+          externalReference,
+          paymentId,
+          montoEsperado: montoOrdenReleida,
+          montoRecibido: montoPago
         });
         return responderJson({
           received: true,

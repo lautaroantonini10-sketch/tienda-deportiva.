@@ -711,23 +711,30 @@ if (btnMisCompras) {
                 return;
             }
 
-            const comprasAprobadas = resultado.docs
+            const estadosCompra = {
+                approved: "Pago aprobado",
+                partially_refunded: "Reembolso parcial",
+                refunded: "Reembolsado",
+                charged_back: "Contracargo"
+            };
+
+            const comprasHistorial = resultado.docs
                 .map(function(doc) {
                     return doc.data();
                 })
                 .filter(function(compra) {
-                    return compra.estado === "approved";
+                    return Object.hasOwn(estadosCompra, compra.estado);
                 });
 
-            if (comprasAprobadas.length === 0) {
+            if (comprasHistorial.length === 0) {
                 contenedorHistorial.innerHTML =
-                    "<p>Todavía no tenés compras aprobadas.</p>";
+                    "<p>Todavía no tenés compras confirmadas.</p>";
                 return;
             }
 
             contenedorHistorial.innerHTML = "";
 
-            comprasAprobadas.forEach(function(compra) {
+            comprasHistorial.forEach(function(compra) {
                 let itemsTexto = "";
 
                 compra.items.forEach(function(item) {
@@ -749,6 +756,21 @@ if (btnMisCompras) {
                     "<p class='compra-total'>Total: $" +
                     Number(compra.total).toLocaleString("es-AR") +
                     "</p>";
+
+                const estadoCompra = document.createElement("p");
+                estadoCompra.textContent = estadosCompra[compra.estado];
+                divCompra.appendChild(estadoCompra);
+
+                if (
+                    (compra.estado === "partially_refunded" || compra.estado === "refunded") &&
+                    compra.montoReembolsado != null &&
+                    Number.isFinite(Number(compra.montoReembolsado))
+                ) {
+                    const reembolso = document.createElement("p");
+                    reembolso.textContent = "Reembolsado: $" +
+                        Number(compra.montoReembolsado).toLocaleString("es-AR");
+                    divCompra.appendChild(reembolso);
+                }
 
                 contenedorHistorial.appendChild(divCompra);
             });
