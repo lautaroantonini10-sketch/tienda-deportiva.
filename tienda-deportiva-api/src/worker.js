@@ -545,8 +545,22 @@ async function crearPreferencia(
     );
   }
 
+  if (
+    typeof datos !== "object" ||
+    datos === null ||
+    Array.isArray(datos) ||
+    !Array.isArray(datos.carrito)
+  ) {
+    return responderJson(
+      {
+        error: "Datos inválidos"
+      },
+      400
+    );
+  }
+
   const carrito =
-    datos.carrito || [];
+    datos.carrito;
 
   if (
     !Array.isArray(carrito) ||
@@ -561,12 +575,24 @@ async function crearPreferencia(
   }
 
   const items = [];
+  const cantidadesPorProducto = new Map();
 
   for (const producto of carrito) {
-    const precioReal =
-      catalogo[producto.nombre];
+    if (
+      typeof producto !== "object" ||
+      producto === null ||
+      Array.isArray(producto) ||
+      typeof producto.nombre !== "string"
+    ) {
+      return responderJson(
+        {
+          error: "Producto no válido"
+        },
+        400
+      );
+    }
 
-    if (!precioReal) {
+    if (!Object.hasOwn(catalogo, producto.nombre)) {
       return responderJson(
         {
           error:
@@ -577,10 +603,27 @@ async function crearPreferencia(
       );
     }
 
-    const cantidad =
-      Number(producto.cantidad);
+    const precioReal =
+      catalogo[producto.nombre];
 
     if (
+      typeof precioReal !== "number" ||
+      !Number.isFinite(precioReal) ||
+      precioReal <= 0
+    ) {
+      return responderJson(
+        {
+          error: "Precio no válido para: " + producto.nombre
+        },
+        400
+      );
+    }
+
+    const cantidad =
+      producto.cantidad;
+
+    if (
+      typeof cantidad !== "number" ||
       !Number.isInteger(cantidad) ||
       cantidad < 1 ||
       cantidad > 10
@@ -594,6 +637,20 @@ async function crearPreferencia(
         400
       );
     }
+
+    const cantidadAcumulada =
+      (cantidadesPorProducto.get(producto.nombre) || 0) + cantidad;
+
+    if (cantidadAcumulada > 10) {
+      return responderJson(
+        {
+          error: "Máximo 10 unidades por producto: " + producto.nombre
+        },
+        400
+      );
+    }
+
+    cantidadesPorProducto.set(producto.nombre, cantidadAcumulada);
 
     items.push({
       title: producto.nombre,
@@ -1009,6 +1066,21 @@ async function procesarWebhook(
     return responderJson({
       received: true,
       ignored: "amount_mismatch"
+    });
+  }
+
+  if (payment.currency_id !== "ARS") {
+    console.error(
+      "La moneda del pago no coincide con la orden:",
+      {
+        monedaPago: payment.currency_id,
+        externalReference
+      }
+    );
+
+    return responderJson({
+      received: true,
+      ignored: "currency_mismatch"
     });
   }
 
