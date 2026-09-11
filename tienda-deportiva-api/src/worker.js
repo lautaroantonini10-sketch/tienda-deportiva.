@@ -519,6 +519,148 @@ async function aprobarOrdenFirestore(
 }
 
 
+function timestampReversoEnNanosegundos(valor) {
+  if (typeof valor !== "string") return null;
+  const partes = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,9}))?(Z|([+-])(\d{2}):(\d{2}))$/.exec(valor);
+  if (!partes) return null;
+  const [anio, mes, dia, hora, minuto, segundo] = partes.slice(1, 7).map(Number);
+  const offsetHora = Number(partes[10] || 0);
+  const offsetMinuto = Number(partes[11] || 0);
+  if (anio < 1 || mes < 1 || mes > 12 || dia < 1 || dia > 31 || hora > 23 || minuto > 59 || segundo > 59 || offsetHora > 23 || offsetMinuto > 59) return null;
+  const fecha = new Date(0);
+  fecha.setUTCFullYear(anio, mes - 1, dia);
+  fecha.setUTCHours(hora, minuto, segundo, 0);
+  if (fecha.getUTCFullYear() !== anio || fecha.getUTCMonth() !== mes - 1 || fecha.getUTCDate() !== dia) return null;
+  const offset = (offsetHora * 60 + offsetMinuto) * (partes[9] === "-" ? -1 : 1);
+  const fraccion = BigInt((partes[7] || "").padEnd(9, "0"));
+  return BigInt(fecha.getTime()) * 1000000n + fraccion - BigInt(offset) * 60000000000n;
+}
+
+function importeReversoEnCentavos(valor) {
+  if (typeof valor !== "number" && typeof valor !== "string") return null;
+  if (typeof valor === "number" && !Number.isFinite(valor)) return null;
+  const partes = /^(0|[1-9]\d*)(?:\.(\d{1,2}))?$/.exec(String(valor));
+  if (!partes) return null;
+  const centavos = BigInt(partes[1]) * 100n + BigInt((partes[2] || "").padEnd(2, "0"));
+  return centavos <= BigInt(Number.MAX_SAFE_INTEGER) ? Number(centavos) : null;
+}
+
+async function actualizarReversoFirestore(env, ordenId, updateTime, campos) {
+  const permitidos = ["estado", "montoReembolsado", "detalleEstadoPago", "fechaActualizacionPago"];
+  const nombres = Object.keys(campos);
+  if (timestampReversoEnNanosegundos(updateTime) === null || nombres.length === 0 || nombres.some(nombre => !permitidos.includes(nombre))) {
+    throw new Error("Actualización de reverso inválida");
+  }
+  const google = await obtenerGoogleAccessToken(env);
+  const url =
+    "https://firestore.googleapis.com/v1/projects/" +
+    encodeURIComponent(google.projectId) +
+    "/databases/(default)/documents/compras/" +
+    encodeURIComponent(ordenId) + "?" +
+    nombres.map(nombre => "updateMask.fieldPaths=" + encodeURIComponent(nombre)).join("&") +
+    "&currentDocument.updateTime=" + encodeURIComponent(updateTime);
+  const respuesta = await fetch(url, {
+    method: "PATCH",
+    headers: {
+      Authorization: "Bearer " + google.token,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ fields: campos })
+  });
+  if (respuesta.ok) return "updated";
+  let errorFirestore;
+  try {
+    errorFirestore = await respuesta.json();
+  } catch {
+    errorFirestore = null;
+  }
+  if (respuesta.status === 400 && errorFirestore?.error?.status === "FAILED_PRECONDITION") {
+    return "precondition_failed";
+  }
+  console.error("Error actualizando reverso:", { ordenId, status: respuesta.status });
+  throw new Error("No se pudo actualizar el reverso");
+}
+
+function evaluarReverso(orden, payment, esRelectura = false) {
+  const externalReference = payment.external_reference;
+  const paymentId = String(payment.id);
+  function ignorar(motivo) {
+    console.warn("Reverso ignorado:", {
+      externalReference,
+      paymentId,
+      estado: payment.status,
+      detalle: payment.status_detail,
+      motivo
+    });
+    return { respuesta: responderJson({ received: true, ignored: motivo }) };
+  }
+  function estructuraInvalida() {
+    if (esRelectura) throw new Error("Orden incoherente al releer reverso");
+    return ignorar("order_state_conflict");
+  }
+  const fields = orden?.fields;
+  if (!fields || typeof fields !== "object" || Array.isArray(fields)) return estructuraInvalida();
+  const idAsociado = fields.mercadoPagoPaymentId?.stringValue;
+  const estadoActual = fields.estado?.stringValue;
+  const campoId = fields.mercadoPagoPaymentId;
+  if (typeof estadoActual !== "string" || estadoActual === "") return estructuraInvalida();
+  if (campoId !== undefined && campoId?.nullValue !== null && (typeof idAsociado !== "string" || idAsociado === "")) return estructuraInvalida();
+  if (esRelectura && !idAsociado && estadoActual !== "pending_payment") return estructuraInvalida();
+  if (fields.detalleEstadoPago !== undefined && typeof fields.detalleEstadoPago?.stringValue !== "string") return estructuraInvalida();
+  if (typeof idAsociado === "string" && idAsociado !== "" && idAsociado !== paymentId) return ignorar("payment_id_conflict");
+  if (!idAsociado || !["approved", "partially_refunded", "refunded", "charged_back"].includes(fields.estado?.stringValue)) return ignorar("order_state_conflict");
+  if (timestampReversoEnNanosegundos(fields.fechaPago?.timestampValue) === null || timestampReversoEnNanosegundos(orden.updateTime) === null) return estructuraInvalida();
+
+  const total = importeReversoEnCentavos(payment.transaction_amount);
+  const totalOrden = importeReversoEnCentavos(fields.total?.integerValue ?? fields.total?.doubleValue);
+  const refund = importeReversoEnCentavos(payment.transaction_amount_refunded);
+  const fechaNueva = timestampReversoEnNanosegundos(payment.date_last_updated);
+  if (total === null || total <= 0 || fechaNueva === null) return ignorar("payment_state_conflict");
+  if (totalOrden === null || total !== totalOrden) return ignorar("amount_mismatch");
+
+  let estadoObjetivo;
+  const detalle = payment.status_detail;
+  if (payment.status === "charged_back") {
+    if (!["in_process", "settled", "reimbursed"].includes(detalle)) return ignorar("payment_state_conflict");
+    if (payment.transaction_amount_refunded !== undefined && (refund === null || refund > total)) return ignorar("payment_state_conflict");
+    estadoObjetivo = "charged_back";
+  } else {
+    if (refund === null || refund > total) return ignorar("payment_state_conflict");
+    if (payment.status === "approved" && detalle === "partially_refunded" && refund > 0 && refund < total) {
+      estadoObjetivo = "partially_refunded";
+    } else if (payment.status === "refunded" && ["refunded", "by_admin"].includes(detalle) && refund === total) {
+      estadoObjetivo = "refunded";
+    } else {
+      return ignorar("payment_state_conflict");
+    }
+  }
+
+  const campoRefund = fields.montoReembolsado;
+  const refundGuardado = campoRefund === undefined ? null : importeReversoEnCentavos(campoRefund?.doubleValue ?? campoRefund?.integerValue);
+  if (campoRefund !== undefined && (refundGuardado === null || refundGuardado > total)) return estructuraInvalida();
+  if (estadoActual === "partially_refunded" && (refundGuardado === null || refundGuardado <= 0 || refundGuardado >= total)) return estructuraInvalida();
+  if (estadoActual === "refunded" && refundGuardado !== total) return estructuraInvalida();
+  const campoFecha = fields.fechaActualizacionPago;
+  const fechaAnterior = campoFecha === undefined ? null : timestampReversoEnNanosegundos(campoFecha?.timestampValue);
+  if (campoFecha !== undefined && fechaAnterior === null) return estructuraInvalida();
+  if (fechaAnterior !== null && fechaNueva < fechaAnterior) return ignorar("stale_payment_snapshot");
+  if (estadoObjetivo !== "charged_back" && refundGuardado !== null && refund < refundGuardado) return ignorar("payment_state_conflict");
+
+  const coincide = fields.estado.stringValue === estadoObjetivo &&
+    fields.detalleEstadoPago?.stringValue === detalle &&
+    (estadoObjetivo === "charged_back" || refundGuardado === refund);
+  if (coincide) return { respuesta: responderJson({ received: true }) };
+  if (fechaAnterior !== null && fechaNueva === fechaAnterior) return ignorar("payment_state_conflict");
+
+  const campos = {};
+  if (fields.estado.stringValue !== estadoObjetivo) campos.estado = { stringValue: estadoObjetivo };
+  if (fields.detalleEstadoPago?.stringValue !== detalle) campos.detalleEstadoPago = { stringValue: detalle };
+  if (estadoObjetivo !== "charged_back" && refundGuardado !== refund) campos.montoReembolsado = { doubleValue: refund / 100 };
+  campos.fechaActualizacionPago = { timestampValue: payment.date_last_updated };
+  return { campos };
+}
+
+
 // ======================================================
 // CREATE PREFERENCE
 // ======================================================
@@ -1107,6 +1249,37 @@ async function procesarWebhook(
       received: true,
       ignored: "currency_mismatch"
     });
+  }
+
+  const requiereEvaluarReverso =
+    payment.status === "refunded" ||
+    payment.status === "charged_back" ||
+    (payment.status === "approved" && (
+      payment.status_detail !== "accredited" ||
+      (payment.transaction_amount_refunded !== undefined &&
+        importeReversoEnCentavos(payment.transaction_amount_refunded) !== 0)
+    ));
+
+  if (requiereEvaluarReverso) {
+    const decision = evaluarReverso(orden, payment);
+    if (decision.respuesta) return decision.respuesta;
+    const resultadoReverso = await actualizarReversoFirestore(
+      env, externalReference, orden.updateTime, decision.campos
+    );
+    if (resultadoReverso === "precondition_failed") {
+      const ordenReleida = await obtenerOrdenFirestore(env, externalReference);
+      if (!ordenReleida) throw new Error("La orden desapareció al releer reverso");
+      const reevaluacion = evaluarReverso(ordenReleida, payment, true);
+      if (reevaluacion.respuesta) return reevaluacion.respuesta;
+      throw new Error("El reverso requiere un reintento externo");
+    }
+    console.log("Reverso actualizado:", {
+      externalReference,
+      paymentId: String(payment.id),
+      estado: payment.status,
+      detalle: payment.status_detail
+    });
+    return responderJson({ received: true });
   }
 
   if (
