@@ -50,6 +50,9 @@ const CORS = {
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS"
 };
 
+const MAX_BODY_BYTES = 32768;
+const MAX_CARRITO_ENTRADAS = 360;
+
 const TIMEOUT_GOOGLE_OAUTH_MS = 4000;
 const TIMEOUT_IDENTITY_TOOLKIT_MS = 5000;
 const TIMEOUT_FIRESTORE_MS = 3000;
@@ -62,6 +65,27 @@ let googleTokenCache = null;
 // ======================================================
 // RESPUESTAS
 // ======================================================
+
+async function leerBodyLimitado(request, maxBytes) {
+  const contentLength = request.headers.get("Content-Length");
+  const errorTamano = new Error("Solicitud demasiado grande");
+  errorTamano.name = "PayloadTooLargeError";
+
+  if (
+    contentLength !== null &&
+    /^\d+$/.test(contentLength.trim()) &&
+    BigInt(contentLength.trim()) > BigInt(maxBytes)
+  ) {
+    throw errorTamano;
+  }
+
+  const texto = await request.text();
+  if (new TextEncoder().encode(texto).byteLength > maxBytes) {
+    throw errorTamano;
+  }
+  return texto;
+}
+
 
 async function fetchConTimeout(url, opciones, timeoutMs, contexto) {
   const controller = new AbortController();
@@ -789,8 +813,12 @@ async function crearPreferencia(
   let datos;
 
   try {
-    datos = await request.json();
-  } catch {
+    const texto = await leerBodyLimitado(request, MAX_BODY_BYTES);
+    datos = JSON.parse(texto);
+  } catch (error) {
+    if (error?.name === "PayloadTooLargeError") {
+      return responderJson({ error: "Solicitud demasiado grande" }, 413);
+    }
     return responderJson(
       {
         error: "Datos inválidos"
@@ -826,6 +854,10 @@ async function crearPreferencia(
       },
       400
     );
+  }
+
+  if (carrito.length > MAX_CARRITO_ENTRADAS) {
+    return responderJson({ error: "Demasiadas entradas en el carrito" }, 400);
   }
 
   const items = [];
@@ -1193,9 +1225,12 @@ async function procesarWebhook(
   let body = {};
 
   try {
-    body =
-      await request.json();
-  } catch {
+    const texto = await leerBodyLimitado(request, MAX_BODY_BYTES);
+    body = JSON.parse(texto);
+  } catch (error) {
+    if (error?.name === "PayloadTooLargeError") {
+      return responderJson({ error: "Solicitud demasiado grande" }, 413);
+    }
     body = {};
   }
 
