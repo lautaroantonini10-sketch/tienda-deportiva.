@@ -2,6 +2,8 @@
 
 E-commerce deportivo full stack construido con HTML, CSS y JavaScript vanilla, Firebase y Cloudflare Workers, con autenticación, carrito, historial de compras e integración segura con Mercado Pago Checkout Pro.
 
+Este despliegue de portfolio utiliza Mercado Pago **TEST**. El código soporta TEST y PRODUCCIÓN mediante configuración explícita; no se activan cobros reales por publicar el código.
+
 El proyecto se desarrolló con un flujo de trabajo asistido por IA, manteniendo la dirección técnica, la implementación, la revisión de cambios y la validación mediante pruebas bajo responsabilidad de su desarrollador.
 
 ## Funcionalidades
@@ -118,6 +120,7 @@ El historial muestra el importe reembolsado para parciales y totales cuando est�
 - Auth se valida antes de procesar el carrito; HMAC antes de leer el body del webhook.
 - Credenciales Firebase inválidas reconocidas producen 401. Errores operativos de Identity Toolkit, como 429/5xx, timeout o fallo de red, producen error operativo, no una falsa sesión inválida.
 - Firma HMAC-SHA256 con `x-signature`, `x-request-id`, ID del pago y timestamp del manifiesto; el payment se obtiene después con la credencial del servidor.
+- Se validan el entorno `live_mode` y vendedor `collector_id` del payment antes de leer o modificar Firestore.
 - Se exige moneda `ARS`, correspondencia de monto y una orden asociada a `external_reference`.
 - Payment ID estable e idempotencia: las repeticiones no reescriben fechaPago ni el mismo estado financiero.
 - PATCH condicionado por `currentDocument.updateTime`: cada ejecución intenta como máximo un PATCH y una relectura ante HTTP 400 `FAILED_PRECONDITION`.
@@ -150,11 +153,24 @@ Secrets del Worker, documentados únicamente por nombre:
 
 | Nombre | Propósito |
 |---|---|
-| `MP_ACCESS_TOKEN` | Acceso del servidor a Mercado Pago |
+| `MP_ACCESS_TOKEN` | Acceso del servidor a Mercado Pago correspondiente al entorno elegido |
 | `FIREBASE_SERVICE_ACCOUNT_BASE64` | Service account codificada para autenticar el acceso administrativo a Firestore |
 | `MP_WEBHOOK_SECRET` | Verificación HMAC de notificaciones |
 
 Se administran mediante `wrangler secret put` o la configuración de Cloudflare. Los valores no se incluyen aquí. Base64 no es cifrado: el contenido de la service account sigue siendo privado.
+
+Configuración obligatoria de entorno y vendedor del Worker:
+
+| Variable | Formato y uso |
+|---|---|
+| `MP_EXPECTED_LIVE_MODE` | String exactamente `"false"` para TEST o `"true"` para PRODUCCIÓN |
+| `MP_EXPECTED_COLLECTOR_ID` | String de dígitos decimales de un ID positivo, sin espacios ni ceros iniciales, del vendedor esperado |
+
+Estas variables no son credenciales privadas en sí mismas, pero sus valores concretos se configuran fuera del repositorio. Antes de desplegar esta versión deben estar presentes en el entorno del Worker. Para desarrollo local también deben proporcionarse en la configuración local ignorada.
+
+La configuración se valida antes de crear una preferencia y antes de consultar el payment del webhook. Una configuración ausente o inválida produce un error operativo 500. Una vez consultado el payment, live_mode debe coincidir como booleano y collector_id debe coincidir por su representación string; un collector numérico debe ser un entero seguro. Los mismatches producen 500 sin leer ni escribir Firestore y sin revelar los valores configurados en logs. No hay descubrimiento automático del vendedor ni consultas a /users/me.
+
+Configurar estas variables no cambia ni verifica por anticipado la titularidad de MP_ACCESS_TOKEN. La comprobación real de entorno/vendedor ocurre al consultar el payment. Nunca mezclar credenciales, vendedor y configuración de TEST con PRODUCCIÓN.
 
 Configuración pública existente:
 
@@ -294,7 +310,11 @@ Revisar los cambios y comprobar el destino antes de publicar. Las dos configurac
 
 ## Configuración de Mercado Pago
 
-Utilizar la aplicación y credencial de producción correspondientes a la tienda, y configurar la notificación `payment` con la URL del webhook indicada arriba. El secreto de firma debe corresponder a esa configuración.
+Este despliegue de portfolio utiliza TEST: MP_ACCESS_TOKEN y el vendedor esperado deben corresponder al entorno de prueba, con MP_EXPECTED_LIVE_MODE configurado como el string "false".
+
+Para un cliente en PRODUCCIÓN se requieren su propia aplicación, credenciales y collector, con MP_EXPECTED_LIVE_MODE configurado como el string "true". El cambio es de configuración, sin modificar el código. No se activa producción ni se cambian credenciales como parte de esta documentación.
+
+Configurar la notificación `payment` con la URL del webhook indicada arriba. El secreto de firma debe corresponder a esa configuración.
 
 El Worker utiliza Checkout Pro y crea preferencias con estas URLs de retorno:
 
@@ -335,14 +355,13 @@ Usar entornos o simuladores seguros para refunds, chargebacks, fallos y concurre
 - Considerar lectura de body con corte por bytes si se necesita protección estricta de memoria.
 - Conectar logs estructurados con alertas externas y un procedimiento de revisión de anomalías.
 - Incorporar reconciliación de preferencias huérfanas/resultados inciertos, sin reintentos ciegos de escrituras.
-- Añadir comprobaciones explícitas de `live_mode` y `collector_id` si se decide fijar entorno/cuenta.
 - Evaluar una política temporal adicional contra replay y un presupuesto total del webhook si las mediciones lo justifican.
 - Completar favicon y detalles visuales.
 - Extraer en el futuro un starter-ecommerce: parametrizar catálogo, marca, URLs y proyectos. Esa abstracción no existe actualmente.
 
 Son mejoras de operación y reutilización, no una afirmación de fallos críticos presentes en el flujo validado.
 
-## Producción y versionado
+## Despliegue de portfolio y versionado
 
 | Recurso | Referencia |
 |---|---|

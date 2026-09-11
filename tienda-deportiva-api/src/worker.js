@@ -66,6 +66,29 @@ let googleTokenCache = null;
 // RESPUESTAS
 // ======================================================
 
+function validarConfiguracionMercadoPago(env) {
+  const liveMode = env.MP_EXPECTED_LIVE_MODE;
+  const collectorId = env.MP_EXPECTED_COLLECTOR_ID;
+
+  if (
+    (liveMode !== "true" && liveMode !== "false") ||
+    typeof collectorId !== "string" ||
+    !/^[1-9]\d*$/.test(collectorId)
+  ) {
+    console.error({
+      servicio: "Mercado Pago",
+      motivo: "configuracion_invalida"
+    });
+    throw new Error("Configuración de Mercado Pago inválida");
+  }
+
+  return {
+    expectedLiveMode: liveMode === "true",
+    expectedCollectorId: collectorId
+  };
+}
+
+
 async function leerBodyLimitado(request, maxBytes) {
   const contentLength = request.headers.get("Content-Length");
   const errorTamano = new Error("Solicitud demasiado grande");
@@ -954,6 +977,8 @@ async function crearPreferencia(
       0
     );
 
+  validarConfiguracionMercadoPago(env);
+
   const ordenId =
     crypto.randomUUID();
 
@@ -1253,6 +1278,8 @@ async function procesarWebhook(
     });
   }
 
+  const configuracionMP = validarConfiguracionMercadoPago(env);
+
   const respuestaPago =
     await fetchConTimeout(
       "https://api.mercadopago.com/v1/payments/" +
@@ -1299,6 +1326,32 @@ async function procesarWebhook(
 
   const externalReference =
     payment.external_reference;
+
+  if (payment.live_mode !== configuracionMP.expectedLiveMode) {
+    console.error({
+      servicio: "Mercado Pago",
+      motivo: "live_mode_mismatch",
+      externalReference,
+      paymentId: String(payment.id)
+    });
+    throw new Error("El entorno del pago no coincide con la configuración");
+  }
+
+  if (
+    !(
+      typeof payment.collector_id === "string" ||
+      (typeof payment.collector_id === "number" && Number.isSafeInteger(payment.collector_id))
+    ) ||
+    String(payment.collector_id) !== configuracionMP.expectedCollectorId
+  ) {
+    console.error({
+      servicio: "Mercado Pago",
+      motivo: "collector_mismatch",
+      externalReference,
+      paymentId: String(payment.id)
+    });
+    throw new Error("El vendedor del pago no coincide con la configuración");
+  }
 
   if (!externalReference) {
     console.log(
