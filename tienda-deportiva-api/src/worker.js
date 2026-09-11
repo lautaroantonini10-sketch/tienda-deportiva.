@@ -364,8 +364,7 @@ async function guardarOrdenFirestore(
 
     console.error(
       "Error Firestore:",
-      respuesta.status,
-      detalle
+      { servicio: "Firestore", status: respuesta.status, ordenId }
     );
 
     throw new Error(
@@ -409,8 +408,7 @@ async function obtenerOrdenFirestore(
 
     console.error(
       "Error leyendo orden:",
-      respuesta.status,
-      detalle
+      { servicio: "Firestore", status: respuesta.status, ordenId }
     );
 
     throw new Error(
@@ -506,8 +504,7 @@ async function aprobarOrdenFirestore(
 
     console.error(
       "Error aprobando orden:",
-      respuesta.status,
-      detalle
+      { servicio: "Firestore", status: respuesta.status, ordenId }
     );
 
     throw new Error(
@@ -887,8 +884,7 @@ async function crearPreferencia(
   ) {
     console.error(
       "Error Mercado Pago:",
-      respuestaMP.status,
-      resultadoMP
+      { servicio: "Mercado Pago", status: respuestaMP.status, ordenId }
     );
 
     throw new Error(
@@ -1111,6 +1107,10 @@ async function procesarWebhook(
     body = {};
   }
 
+  if (typeof body !== "object" || body === null || Array.isArray(body)) {
+    body = {};
+  }
+
   if (
     body.type &&
     body.type !== "payment"
@@ -1146,8 +1146,7 @@ async function procesarWebhook(
 
     console.error(
       "Error consultando pago:",
-      respuestaPago.status,
-      detalle
+      { servicio: "Mercado Pago", status: respuestaPago.status, paymentId: dataId }
     );
 
     throw new Error(
@@ -1493,7 +1492,7 @@ export default {
     } catch (error) {
       console.error(
         "Error del Worker:",
-        error
+        { servicio: "Worker", status: 500 }
       );
 
       return responderJson(
