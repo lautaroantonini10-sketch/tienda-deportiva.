@@ -665,9 +665,22 @@ const btnMisCompras = document.querySelector("#btn-mis-compras");
 const modalHistorial = document.querySelector("#modal-historial");
 const btnCerrarModal = document.querySelector("#btn-cerrar-modal");
 const contenedorHistorial = document.querySelector("#contenedor-historial");
+let contadorSolicitudesHistorial = 0;
+let ultimoUidHistorial = window.auth?.currentUser?.uid || null;
+
+window.addEventListener("tienda:auth-cambiada", function(evento) {
+    const uid = evento.detail.uid;
+    if (uid !== ultimoUidHistorial) {
+        ultimoUidHistorial = uid;
+        contadorSolicitudesHistorial++;
+        cerrarHistorial();
+        contenedorHistorial.innerHTML = "";
+    }
+});
 
 if (btnMisCompras) {
     btnMisCompras.addEventListener("click", async function() {
+        const requestId = ++contadorSolicitudesHistorial;
         document.querySelector("#seccion-auth")?.classList.remove("mostrar");
 
         modalHistorial.classList.remove("oculto");
@@ -681,16 +694,22 @@ if (btnMisCompras) {
             return;
         }
 
+        const uidConsulta = usuarioLogueado.uid;
+
         try {
             const { collection, query, where, getDocs } =
                 window.firestoreTools;
 
             const consulta = query(
                 collection(window.db, "compras"),
-                where("usuarioUid", "==", usuarioLogueado.uid)
+                where("usuarioUid", "==", uidConsulta)
             );
 
             const resultado = await getDocs(consulta);
+
+            if (requestId !== contadorSolicitudesHistorial || window.auth?.currentUser?.uid !== uidConsulta) {
+                return;
+            }
 
             const comprasAprobadas = resultado.docs
                 .map(function(doc) {
@@ -735,6 +754,10 @@ if (btnMisCompras) {
             });
 
         } catch (error) {
+            if (requestId !== contadorSolicitudesHistorial || window.auth?.currentUser?.uid !== uidConsulta) {
+                return;
+            }
+
             console.error("Error al cargar compras:", error);
 
             contenedorHistorial.innerHTML =

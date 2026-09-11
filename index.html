@@ -1373,6 +1373,11 @@ onAuthStateChanged(window.auth, function(usuario) {
         infoUsuarioHeader.style.display = "none";
         emailUsuario.textContent = "";
     }
+    window.dispatchEvent(new CustomEvent("tienda:auth-cambiada", {
+        detail: {
+            uid: usuario ? usuario.uid : null
+        }
+    }));
 });
 </script>
 
