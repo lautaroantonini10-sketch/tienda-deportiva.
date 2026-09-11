@@ -429,8 +429,16 @@ async function obtenerOrdenFirestore(
 async function aprobarOrdenFirestore(
   env,
   ordenId,
-  paymentId
+  paymentId,
+  updateTime
 ) {
+  if (
+    typeof updateTime !== "string" ||
+    !/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])T([01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.(?:\d{3}|\d{6}|\d{9}))?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/.test(updateTime)
+  ) {
+    throw new Error("updateTime inválido para aprobar la orden");
+  }
+
   const google =
     await obtenerGoogleAccessToken(env);
 
@@ -444,7 +452,9 @@ async function aprobarOrdenFirestore(
     base +
     "?updateMask.fieldPaths=estado" +
     "&updateMask.fieldPaths=mercadoPagoPaymentId" +
-    "&updateMask.fieldPaths=fechaPago";
+    "&updateMask.fieldPaths=fechaPago" +
+    "&currentDocument.updateTime=" +
+    encodeURIComponent(updateTime);
 
   const documento = {
     fields: {
@@ -481,6 +491,19 @@ async function aprobarOrdenFirestore(
     const detalle =
       await respuesta.text();
 
+    if (respuesta.status === 400) {
+      let errorFirestore;
+      try {
+        errorFirestore = JSON.parse(detalle);
+      } catch {
+        errorFirestore = null;
+      }
+
+      if (errorFirestore?.error?.status === "FAILED_PRECONDITION") {
+        return "precondition_failed";
+      }
+    }
+
     console.error(
       "Error aprobando orden:",
       respuesta.status,
@@ -491,6 +514,8 @@ async function aprobarOrdenFirestore(
       "No se pudo aprobar la orden"
     );
   }
+
+  return "updated";
 }
 
 
@@ -1089,11 +1114,117 @@ async function procesarWebhook(
     payment.status_detail ===
       "accredited"
   ) {
-    await aprobarOrdenFirestore(
+    const paymentId = String(payment.id);
+
+    function evaluarOrdenParaAprobacion(ordenActual, esRelectura) {
+      const fields = ordenActual?.fields;
+      const estado = fields?.estado?.stringValue;
+      const campoPaymentId = fields?.mercadoPagoPaymentId;
+      const paymentIdAlmacenado = campoPaymentId?.stringValue;
+      const fechaPago = fields?.fechaPago;
+      const updateTime = ordenActual?.updateTime;
+      const paymentIdValido =
+        campoPaymentId === undefined ||
+        campoPaymentId?.nullValue === null ||
+        (typeof paymentIdAlmacenado === "string" && paymentIdAlmacenado !== "");
+      const fechaPagoValida =
+        fechaPago === undefined ||
+        (typeof fechaPago?.timestampValue === "string" && fechaPago.timestampValue !== "");
+      const estructuraValida =
+        typeof estado === "string" && estado !== "" &&
+        paymentIdValido && fechaPagoValida;
+      const updateTimeValido =
+        typeof updateTime === "string" &&
+        /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])T([01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.(?:\d{3}|\d{6}|\d{9}))?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/.test(updateTime);
+
+      if (esRelectura && (
+        !estructuraValida ||
+        !updateTimeValido ||
+        (estado === "approved" && (!paymentIdAlmacenado || !fechaPago))
+      )) {
+        throw new Error("Orden incoherente después del conflicto de precondición");
+      }
+
+      if (estructuraValida && estado === "approved" && paymentIdAlmacenado === paymentId) {
+        return responderJson({ received: true });
+      }
+
+      if (typeof paymentIdAlmacenado === "string" && paymentIdAlmacenado !== "" && paymentIdAlmacenado !== paymentId) {
+        console.warn("Conflicto de payment ID:", {
+          externalReference,
+          paymentIdAlmacenado,
+          paymentIdRecibido: paymentId
+        });
+        return responderJson({
+          received: true,
+          ignored: "payment_id_conflict"
+        });
+      }
+
+      if (
+        !estructuraValida ||
+        estado !== "pending_payment" ||
+        paymentIdAlmacenado !== undefined ||
+        fechaPago !== undefined ||
+        !updateTimeValido
+      ) {
+        if (esRelectura && estado === "pending_payment") {
+          throw new Error("Orden pendiente incoherente después del conflicto de precondición");
+        }
+        console.warn("Estado de orden incompatible con primera aprobación:", {
+          externalReference,
+          estado
+        });
+        return responderJson({
+          received: true,
+          ignored: "order_state_conflict"
+        });
+      }
+
+      return null;
+    }
+
+    const respuestaEstado = evaluarOrdenParaAprobacion(orden, false);
+    if (respuestaEstado) {
+      return respuestaEstado;
+    }
+
+    const resultadoActualizacion = await aprobarOrdenFirestore(
       env,
       externalReference,
-      payment.id
+      paymentId,
+      orden.updateTime
     );
+
+    if (resultadoActualizacion === "precondition_failed") {
+      const ordenReleida = await obtenerOrdenFirestore(env, externalReference);
+      if (!ordenReleida) {
+        throw new Error("La orden desapareció después del conflicto de precondición");
+      }
+
+      const totalReleido = ordenReleida.fields?.total;
+      const montoOrdenReleida = Number(
+        totalReleido?.integerValue ?? totalReleido?.doubleValue
+      );
+      if (!Number.isFinite(montoOrdenReleida) || montoOrdenReleida !== montoPago) {
+        console.error("El monto del pago no coincide con la orden releída:", {
+          montoPago,
+          montoOrden: montoOrdenReleida,
+          externalReference
+        });
+        return responderJson({
+          received: true,
+          ignored: "amount_mismatch"
+        });
+      }
+
+      const respuestaRelectura = evaluarOrdenParaAprobacion(ordenReleida, true);
+      if (respuestaRelectura) {
+        return respuestaRelectura;
+      }
+
+      throw new Error("La orden sigue pendiente después del conflicto de precondición");
+    }
 
     console.log(
       "Orden aprobada en Firestore:",
